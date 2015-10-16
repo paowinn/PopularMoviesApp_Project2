@@ -1,0 +1,15 @@
+.gradle
+/local.properties
+
+# idea project files
+.idea/
+/.idea/workspace.xml
+/.idea/libraries
+*.iml
+
+.DS_Store
+/build
+/captures
+
+# Gradle generated files
+.gradle/
