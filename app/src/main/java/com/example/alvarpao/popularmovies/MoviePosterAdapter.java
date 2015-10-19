@@ -52,7 +52,6 @@ public class MoviePosterAdapter extends ArrayAdapter<MoviePoster> {
                 .load(moviePoster.getImage())
                 .placeholder(R.drawable.image_loading)
                 .error(R.drawable.error_loading_image)
-                .noFade()
                 .into(imageView);
 
         return convertView;
