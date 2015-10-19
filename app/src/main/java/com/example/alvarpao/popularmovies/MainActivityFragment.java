@@ -1,21 +1,35 @@
 package com.example.alvarpao.popularmovies;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.Toast;
+
+import java.util.Arrays;
 
 /**
- * A placeholder fragment containing a GridView
+ * A fragment containing a grid view of movie posters
  */
 public class MainActivityFragment extends Fragment {
+
+    private MoviePosterAdapter moviePosterAdapter;
+
+    private MoviePoster[] mPosters = {
+            new MoviePoster(R.drawable.poster_0), new MoviePoster(R.drawable.poster_1),
+            new MoviePoster(R.drawable.poster_2), new MoviePoster(R.drawable.poster_3),
+            new MoviePoster(R.drawable.poster_4), new MoviePoster(R.drawable.poster_5),
+            new MoviePoster(R.drawable.poster_6), new MoviePoster(R.drawable.poster_7),
+            new MoviePoster(R.drawable.poster_0), new MoviePoster(R.drawable.poster_1),
+            new MoviePoster(R.drawable.poster_2), new MoviePoster(R.drawable.poster_3),
+            new MoviePoster(R.drawable.poster_4), new MoviePoster(R.drawable.poster_5),
+            new MoviePoster(R.drawable.poster_6), new MoviePoster(R.drawable.poster_7),
+            new MoviePoster(R.drawable.poster_0), new MoviePoster(R.drawable.poster_1),
+            new MoviePoster(R.drawable.poster_2), new MoviePoster(R.drawable.poster_3),
+            new MoviePoster(R.drawable.poster_4), new MoviePoster(R.drawable.poster_5)
+
+    };
 
     public MainActivityFragment() {
     }
@@ -25,9 +39,13 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        GridView moviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
-        moviesGridView.setAdapter(new ImageAdapter(getActivity()));
 
+        moviePosterAdapter = new MoviePosterAdapter(getActivity(), Arrays.asList(mPosters));
+
+        GridView moviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
+        moviesGridView.setAdapter(moviePosterAdapter);
+
+        /*
         moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
@@ -35,66 +53,9 @@ public class MainActivityFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
         });
+        */
 
         return rootView;
     }
 
-    // Custom adapter that will act as the source for all images displayed in the GridView
-    private class ImageAdapter extends BaseAdapter {
-
-        private Context mContext;
-        private Integer[] mPosterIds = {
-                R.drawable.poster_0, R.drawable.poster_1,
-                R.drawable.poster_2, R.drawable.poster_3,
-                R.drawable.poster_4, R.drawable.poster_5,
-                R.drawable.poster_6, R.drawable.poster_7,
-                R.drawable.poster_0, R.drawable.poster_1,
-                R.drawable.poster_2, R.drawable.poster_3,
-                R.drawable.poster_4, R.drawable.poster_5,
-                R.drawable.poster_6, R.drawable.poster_7,
-                R.drawable.poster_0, R.drawable.poster_1,
-                R.drawable.poster_2, R.drawable.poster_3,
-                R.drawable.poster_4, R.drawable.poster_5
-
-        };
-
-        public ImageAdapter(Context context) {
-            mContext = context;
-        }
-
-        public int getCount(){
-            return mPosterIds.length;
-        }
-
-        public ImageView getItem(int position){
-            return null;
-        }
-
-        public long getItemId(int position){
-            return 0;
-        }
-
-        // Create a new ImageView for each item referenced by the Adapter
-        public View getView(int position, View convertView, ViewGroup parent) {
-
-            ImageView imageView;
-
-            if(convertView == null){
-               // If it is not recycled, initialize image attibutes
-
-                imageView = new ImageView(mContext);
-                imageView.setLayoutParams(new GridView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT));
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                //imageView.setPadding(8, 8, 8, 8);
-            }
-
-            else{
-                imageView = (ImageView) convertView;
-            }
-
-            imageView.setImageResource(mPosterIds[position]);
-            return imageView;
-        }
-
-    }
 }

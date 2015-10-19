@@ -1,18 +1,15 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+<GridView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivityFragment">
+    android:id="@+id/movies_grid"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true"
+    android:columnWidth="@dimen/fragment_gridview_column_width"
+    android:numColumns="auto_fit"
+    android:verticalSpacing="@dimen/fragment_gridview_vertical_spacing"
+    android:horizontalSpacing="@dimen/fragment_gridview_horizontal_spacing"
+    android:stretchMode="columnWidth"
+    tools:context=".MainActivityFragment" />
 
-    <GridView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/movies_grid"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:columnWidth="150dp"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="0dp"
-        android:horizontalSpacing="0dp"
-        android:stretchMode="columnWidth"
-        android:gravity="center" />
-</RelativeLayout>
