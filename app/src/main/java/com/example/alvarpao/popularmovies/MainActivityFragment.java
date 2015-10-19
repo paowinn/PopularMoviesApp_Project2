@@ -25,7 +25,7 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        GridView moviesGridView = (GridView) rootView.findViewById(R.id.moviesGridView);
+        GridView moviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
         moviesGridView.setAdapter(new ImageAdapter(getActivity()));
 
         moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

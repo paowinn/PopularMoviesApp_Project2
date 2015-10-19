@@ -6,11 +6,13 @@
     <GridView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/moviesGridView"
+        android:id="@+id/movies_grid"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:columnWidth="180dp"
+        android:columnWidth="150dp"
         android:numColumns="auto_fit"
+        android:verticalSpacing="0dp"
+        android:horizontalSpacing="0dp"
         android:stretchMode="columnWidth"
         android:gravity="center" />
 </RelativeLayout>
