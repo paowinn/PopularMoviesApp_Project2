@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * A fragment containing a grid view of movie posters
@@ -34,20 +34,6 @@ public class MainActivityFragment extends Fragment {
 
     private MoviePosterAdapter mPosterAdapter;
 
-    private MoviePoster[] mPosters = {
-            new MoviePoster(R.drawable.poster_0), new MoviePoster(R.drawable.poster_1),
-            new MoviePoster(R.drawable.poster_2), new MoviePoster(R.drawable.poster_3),
-            new MoviePoster(R.drawable.poster_4), new MoviePoster(R.drawable.poster_5),
-            new MoviePoster(R.drawable.poster_6), new MoviePoster(R.drawable.poster_7),
-            new MoviePoster(R.drawable.poster_0), new MoviePoster(R.drawable.poster_1),
-            new MoviePoster(R.drawable.poster_2), new MoviePoster(R.drawable.poster_3),
-            new MoviePoster(R.drawable.poster_4), new MoviePoster(R.drawable.poster_5),
-            new MoviePoster(R.drawable.poster_6), new MoviePoster(R.drawable.poster_7),
-            new MoviePoster(R.drawable.poster_0), new MoviePoster(R.drawable.poster_1),
-            new MoviePoster(R.drawable.poster_2), new MoviePoster(R.drawable.poster_3),
-            new MoviePoster(R.drawable.poster_4), new MoviePoster(R.drawable.poster_5)
-
-    };
 
     public MainActivityFragment() {
     }
@@ -83,7 +69,7 @@ public class MainActivityFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mPosterAdapter = new MoviePosterAdapter(getActivity(), Arrays.asList(mPosters));
+        mPosterAdapter = new MoviePosterAdapter(getActivity(), new ArrayList<MoviePoster>());
 
         GridView moviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
         moviesGridView.setAdapter(mPosterAdapter);
@@ -140,7 +126,6 @@ public class MainActivityFragment extends Fragment {
                 posterPaths[index] = movieInfo.getString(POSTER_PATH);
                 Log.v(LOG_TAG, "Poster Paths[" + Integer.toString(index) + "]: " + posterPaths[index]);
             }
-
 
             return posterPaths;
 
@@ -234,6 +219,33 @@ public class MainActivityFragment extends Fragment {
             }
 
             return null;
+        }
+
+        private String buildImageURL(String posterPath)
+        {
+            // To build the complete URL for the movie poster you need to append a base path ahead
+            // of the poster_path (relative path) returned by the FetchPosterPathsTask. You then
+            // need to append the size and then finally the poster_path returned by the AsyncTask.
+            // For more information check the Movie Database API in the configuration section
+
+            final String BASE_URL = "http://image.tmdb.org/t/p/";
+            String size = "w185";
+
+            Log.v(LOG_TAG, "Movie Poster: " + BASE_URL + size + posterPath);
+            return BASE_URL + size + posterPath;
+
+        }
+
+        @Override
+        protected void onPostExecute(String[] posterPaths) {
+
+            if (posterPaths != null) {
+
+                mPosterAdapter.clear();
+                for(String posterPath : posterPaths) {
+                    mPosterAdapter.add(new MoviePoster(buildImageURL(posterPath)));
+                }
+            }
         }
 
     }

@@ -8,11 +8,11 @@ package com.example.alvarpao.popularmovies;
 public class MoviePoster {
 
     // Drawable reference id
-    private int image;
+    private String imageURL;
 
-    public MoviePoster(int image) { this.image = image; }
+    public MoviePoster(String imageURL) { this.imageURL = imageURL; }
 
-    public int getImage() {
-        return image;
+    public String getImageURL() {
+        return imageURL;
     }
 }

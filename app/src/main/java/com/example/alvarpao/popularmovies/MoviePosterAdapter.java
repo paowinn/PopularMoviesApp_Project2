@@ -27,10 +27,7 @@ public class MoviePosterAdapter extends ArrayAdapter<MoviePoster> {
         super(context, 0, moviePosters);
     }
 
-    /**
-     * Provides a view that contains a movie poster image for an AdapterView,
-     * in this case a GridView
-     */
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -49,7 +46,7 @@ public class MoviePosterAdapter extends ArrayAdapter<MoviePoster> {
 
         //Using Picasso open source library to facilitate loading images and caching
         Picasso.with(getContext())
-                .load(moviePoster.getImage())
+                .load(moviePoster.getImageURL())
                 .placeholder(R.drawable.image_loading)
                 .error(R.drawable.error_loading_image)
                 .into(imageView);
