@@ -1,7 +1,10 @@
 package com.example.alvarpao.popularmovies;
 
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +15,16 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 
 /**
@@ -57,7 +70,7 @@ public class MainActivityFragment extends Fragment {
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            Toast.makeText(getActivity(), "Refresh", Toast.LENGTH_SHORT).show();
+            getPostersPaths();
             return true;
         }
 
@@ -87,4 +100,141 @@ public class MainActivityFragment extends Fragment {
         return rootView;
     }
 
+    private void getPostersPaths()
+    {
+        FetchPosterPathsTask fetchPosterPathsTask = new FetchPosterPathsTask();
+        fetchPosterPathsTask.execute("popularity.desc");
+    }
+
+    public class FetchPosterPathsTask extends AsyncTask<String, Void, String[]> {
+
+        private final String LOG_TAG = FetchPosterPathsTask.class.getSimpleName();
+        final String DISCOVER_MOVIE_ENDPOINT_BASE_URL = "http://api.themoviedb.org/3/discover/movie";
+        final String API_KEY_PARAMETER = "api_key";
+        final String SORT_PARAMETER = "sort_by";
+
+        private String[] getPosterPathsFromJson(String jsonReply) throws JSONException {
+            // Parse out only the poster path in the JSON reply for each movie.
+            // I used: https://jsonformatter.curiousconcept.com/ to format a
+            // given JSON response and be able to develop code to parse out poster_path
+
+            // The JSON object returned contains a JSON array "results" which contains the
+            // info on each movie returned (including the poster_path)
+
+            final String RESULTS = "results";
+            final String POSTER_PATH = "poster_path";
+            String[] posterPaths;
+
+            JSONObject movieDataJson = new JSONObject(jsonReply);
+
+            // The results array returns info on all the movies sorted by either popularity or
+            // rating (in ascending or descending order for both options)
+            JSONArray resultsArray = movieDataJson.getJSONArray(RESULTS);
+
+            // Movie data is returned by pages. Each page contains info on 20 movies (except for
+            // the last page.
+            posterPaths = new String[resultsArray.length()];
+
+            for (int index = 0; index < resultsArray.length(); index++) {
+                JSONObject movieInfo = resultsArray.getJSONObject(index);
+                posterPaths[index] = movieInfo.getString(POSTER_PATH);
+                Log.v(LOG_TAG, "Poster Paths[" + Integer.toString(index) + "]: " + posterPaths[index]);
+            }
+
+
+            return posterPaths;
+
+        }
+
+        @Override
+        protected String[] doInBackground(String... params) {
+
+            HttpURLConnection urlConnection = null;
+            BufferedReader bufferedReader = null;
+            String movieInfoJsonReply = null;
+
+            // If there is no sorting criteria (popularity, rating) no point on fetching anything
+            if (params.length == 0) {
+                return null;
+            }
+
+            try {
+                //Construction of the URL query for the Movie Database
+                //More info about the API: http://docs.themoviedb.apiary.io/#
+
+                Uri query = Uri.parse(DISCOVER_MOVIE_ENDPOINT_BASE_URL).buildUpon()
+                        .appendQueryParameter(API_KEY_PARAMETER, ApiKey.API_KEY)
+                        .appendQueryParameter(SORT_PARAMETER, params[0])
+                        .build();
+
+                URL queryUrl = new URL(query.toString());
+
+                // Creating the GET request to the Movie Database and then open
+                // a HTTP connection
+                urlConnection = (HttpURLConnection) queryUrl.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer receiveBuffer = new StringBuffer();
+
+                if (inputStream == null) {
+                    return null;
+                }
+
+                // Preparing to read JSON response line by line
+                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    // Adding a new line to every line of JSON response read for
+                    // debugging purposes
+                    receiveBuffer.append(line + "\n");
+                }
+
+                if (receiveBuffer.length() == 0) {
+                    // If not response received then do nothing
+                    return null;
+                }
+
+                // Completing reading JSON response
+                movieInfoJsonReply = receiveBuffer.toString();
+                Log.v(LOG_TAG, "JSON Movie Reply: " + movieInfoJsonReply);
+            }
+
+            catch (IOException exception) {
+
+                Log.e(LOG_TAG, getString(R.string.io_error_message), exception);
+                return null;
+            }
+
+            //Close HTTP connection and buffered reader even if there is an exception
+            finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+
+                if (bufferedReader != null) {
+
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException exception) {
+                        Log.e(LOG_TAG, getString(R.string.error_closing_reader), exception);
+                    }
+                }
+            }
+
+            // Parse JSON response to extract the movie posters paths
+            try {
+
+                return getPosterPathsFromJson(movieInfoJsonReply);
+            } catch (JSONException exception) {
+                Log.e(LOG_TAG, exception.getMessage(), exception);
+                exception.printStackTrace();
+            }
+
+            return null;
+        }
+
+    }
 }
