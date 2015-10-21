@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
@@ -30,10 +31,12 @@ import java.util.ArrayList;
 /**
  * A fragment containing a grid view of movie posters
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements AbsListView.OnScrollListener{
 
     private MoviePosterAdapter mPosterAdapter;
-
+    private boolean mLoadingImages = true;
+    private int mPageToFetch = 1;
+    private int mPreviousTotalItems = 0;
 
     public MainActivityFragment() {
     }
@@ -69,6 +72,8 @@ public class MainActivityFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        // The adapter is initialized with an empty array of movies until it gets data
+        // from the website
         mPosterAdapter = new MoviePosterAdapter(getActivity(), new ArrayList<MoviePoster>());
 
         GridView moviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
@@ -82,14 +87,60 @@ public class MainActivityFragment extends Fragment {
             }
         });
 
+        moviesGridView.setOnScrollListener(this);
 
         return rootView;
     }
 
+    @Override
+    public void onScroll (AbsListView view, int firstVisibleItem, int visibleItemCount,
+                          int totalItemCount)
+    {
+
+        // Since the onScroll method can get called several times at one time when the user is
+        // scrolling, need to verify if the images are still loading before fetching another page
+        // of results (loading it is first initialized as true)
+        if (mLoadingImages)
+        {
+            if (totalItemCount > mPreviousTotalItems)
+            {
+                // Loading data to the grid view has been concluded
+                mLoadingImages = false;
+                mPreviousTotalItems = totalItemCount;
+                mPageToFetch++;
+            }
+        }
+
+        // In order for the next page to be fetched, the previous page has to be loaded and
+        // the user has scrolled enough far down that there will be no more items to display in
+        // the next scroll
+        if (!mLoadingImages && (totalItemCount == (firstVisibleItem + visibleItemCount))) {
+            // I load the next page of gigs using a background task,
+            // but you can call any function here.
+            new FetchPosterPathsTask().execute("popularity.desc", Integer.toString(mPageToFetch));
+            mLoadingImages = true;
+        }
+    }
+
+    @Override
+    public void onScrollStateChanged (AbsListView view, int scrollState)
+    {
+        // Needs to be part of the class, but no need to implement it
+    }
+
+
+
     private void getPostersPaths()
     {
         FetchPosterPathsTask fetchPosterPathsTask = new FetchPosterPathsTask();
-        fetchPosterPathsTask.execute("popularity.desc");
+        fetchPosterPathsTask.execute("popularity.desc", "1");
+    }
+
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        getPostersPaths();
     }
 
     public class FetchPosterPathsTask extends AsyncTask<String, Void, String[]> {
@@ -98,6 +149,7 @@ public class MainActivityFragment extends Fragment {
         final String DISCOVER_MOVIE_ENDPOINT_BASE_URL = "http://api.themoviedb.org/3/discover/movie";
         final String API_KEY_PARAMETER = "api_key";
         final String SORT_PARAMETER = "sort_by";
+        final String PAGE_PARAMETER = "page";
 
         private String[] getPosterPathsFromJson(String jsonReply) throws JSONException {
             // Parse out only the poster path in the JSON reply for each movie.
@@ -150,6 +202,7 @@ public class MainActivityFragment extends Fragment {
                 Uri query = Uri.parse(DISCOVER_MOVIE_ENDPOINT_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_PARAMETER, ApiKey.API_KEY)
                         .appendQueryParameter(SORT_PARAMETER, params[0])
+                        .appendQueryParameter(PAGE_PARAMETER, params[1])
                         .build();
 
                 URL queryUrl = new URL(query.toString());
@@ -241,7 +294,6 @@ public class MainActivityFragment extends Fragment {
 
             if (posterPaths != null) {
 
-                mPosterAdapter.clear();
                 for(String posterPath : posterPaths) {
                     mPosterAdapter.add(new MoviePoster(buildImageURL(posterPath)));
                 }
