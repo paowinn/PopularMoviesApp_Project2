@@ -31,14 +31,14 @@ import java.util.ArrayList;
 /**
  * A fragment containing a grid view of movie posters
  */
-public class MainActivityFragment extends Fragment implements AbsListView.OnScrollListener{
+public class MovieGridFragment extends Fragment implements AbsListView.OnScrollListener{
 
     private MoviePosterAdapter mPosterAdapter;
     private boolean mLoadingImages = true;
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
 
-    public MainActivityFragment() {
+    public MovieGridFragment() {
     }
 
     @Override
