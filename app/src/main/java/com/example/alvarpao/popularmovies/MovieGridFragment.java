@@ -4,6 +4,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -38,6 +41,9 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
 
+    /** An array of Strings to populate the spinner  in the action bar */
+
+
     public MovieGridFragment() {
     }
 
@@ -46,6 +52,30 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         super.onCreate(savedInstanceState);
         // Add the below line in order for this fragment to display and handle menu options.
         setHasOptionsMenu(true);
+
+        final String[] mSortSpinnerActions = new String[] {
+                getString(R.string.preference_sort_title_most_popular),
+                getString(R.string.preference_sort_title_highest_rated)};
+        // Create an array adapter to populate action bar sort spinner
+        ArrayAdapter<String> sortSpinnerAdapter = new ArrayAdapter<String>
+                (getActivity(), R.layout.custom_spinner_dropdown_item, mSortSpinnerActions);
+
+        // Enable dropdown list navigation for the action bar
+        ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+
+        ActionBar.OnNavigationListener navigationListener = new ActionBar.OnNavigationListener() {
+
+            @Override
+            public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+                Toast.makeText(getActivity(), "You selected : " + mSortSpinnerActions[itemPosition]  , Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        };
+
+        // Setting spinner items and item navigation listener for the actionbar
+        actionBar.setListNavigationCallbacks(sortSpinnerAdapter, navigationListener);
+
     }
 
     @Override
@@ -87,6 +117,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             }
         });
 
+        //Handles pagination of movie posters
         moviesGridView.setOnScrollListener(this);
 
         return rootView;
