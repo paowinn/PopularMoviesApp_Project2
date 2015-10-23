@@ -1,9 +1,14 @@
 package com.example.alvarpao.popularmovies;
 
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -38,8 +44,6 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
 
-    /** An array of Strings to populate the spinner  in the action bar */
-
 
     public MovieGridFragment() {
     }
@@ -56,11 +60,37 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main_fragment, menu);
 
-        MenuItem sortSpinner = menu.findItem(R.id.sort_spinner);
-        sortSpinner.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        // Get the array of values for the sort options since the onItemSelected method only
+        // returns the string representation of the item, not the value associated
+        Resources resources = getResources();
+        final TypedArray sortArrayValues = resources.obtainTypedArray(R.array.sort_options_values);
+
+        MenuItem sortMenuItem = menu.findItem(R.id.sort_spinner);
+        Spinner sortSpinner = (Spinner) MenuItemCompat.getActionView(sortMenuItem);
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return false;
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                // Update the shared preferences with the new sort option election
+                SharedPreferences sharedPreferences =
+                  PreferenceManager.getDefaultSharedPreferences(getActivity());
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(getString(R.string.sort_preference_key),
+                        sortArrayValues.getString(position));
+                editor.commit();
+
+                Toast.makeText(getActivity(), "Preference sort: " + sortArrayValues.getString(position), Toast.LENGTH_SHORT).show();
+                //mPosterAdapter.clear();
+                // Update posters to reflect new sort option selected by user
+                getPostersPaths();
+
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+              //Do nothing
             }
         });
     }
@@ -71,7 +101,6 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            getPostersPaths();
             return true;
         }
 
@@ -128,9 +157,12 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // the user has scrolled enough far down that there will be no more items to display in
         // the next scroll
         if (!mLoadingImages && (totalItemCount == (firstVisibleItem + visibleItemCount))) {
-            // I load the next page of gigs using a background task,
-            // but you can call any function here.
-            new FetchPosterPathsTask().execute("popularity.desc", Integer.toString(mPageToFetch));
+
+            // Retrieve the preferred sort option to retrieve the posters in the appropriate order
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
+                    getString(R.string.sort_preference_default));
+            new FetchPosterPathsTask().execute(paramSortValue, Integer.toString(mPageToFetch));
             mLoadingImages = true;
         }
     }
@@ -138,7 +170,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     @Override
     public void onScrollStateChanged (AbsListView view, int scrollState)
     {
-        // Needs to be part of the class, but no need to implement it
+        // Needs to be part of the class, but no need to implement it for the movie grid
     }
 
 
@@ -146,15 +178,13 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     private void getPostersPaths()
     {
         FetchPosterPathsTask fetchPosterPathsTask = new FetchPosterPathsTask();
-        fetchPosterPathsTask.execute("popularity.desc", "1");
+        //Get the appropriate sort option to fetch the posters in the right order
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
+                getString(R.string.sort_preference_default));
+        fetchPosterPathsTask.execute(paramSortValue, "1");
     }
 
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        getPostersPaths();
-    }
 
     public class FetchPosterPathsTask extends AsyncTask<String, Void, String[]> {
 

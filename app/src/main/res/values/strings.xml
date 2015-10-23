@@ -8,5 +8,9 @@
     <string name="action_sort">Sort by</string>
     <string name="sort_title_most_popular">Most popular</string>
     <string name="sort_title_highest_rated">Highest-rated</string>
+    <string name="sort_most_popular_value">popularity.desc</string>
+    <string name="sort_highest_rated_value">vote_average.desc</string>
+    <string name="sort_preference_default">popularity.desc</string>
+    <string name="sort_preference_key">sort</string>
 
 </resources>
