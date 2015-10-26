@@ -74,7 +74,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
                 // Update the shared preferences with the new sort option election
                 SharedPreferences sharedPreferences =
-                  PreferenceManager.getDefaultSharedPreferences(getActivity());
+                        PreferenceManager.getDefaultSharedPreferences(getActivity());
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(getString(R.string.sort_preference_key),
                         sortArrayValues.getString(position));
@@ -82,18 +82,14 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
                 Toast.makeText(getActivity(), "Preference sort: " + sortArrayValues.getString(position), Toast.LENGTH_SHORT).show();
                 // Update posters to reflect new sort option selected by user
-                mPosterAdapter.clear();
-                mPageToFetch = 1;
-                mLoadingImages = true;
-                mPreviousTotalItems = 0;
+                resetMovieGrid();
                 getPostersPaths();
-
 
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-              //Do nothing
+                //Do nothing
             }
         });
     }
@@ -177,6 +173,17 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     }
 
 
+    private void resetMovieGrid()
+    {
+        // Clear movie grid adapter
+        mPosterAdapter.clear();
+
+        // Reset scroll parameters
+        mPageToFetch = 1;
+        mLoadingImages = true;
+        mPreviousTotalItems = 0;
+
+    }
 
     private void getPostersPaths()
     {
