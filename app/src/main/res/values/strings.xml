@@ -10,5 +10,6 @@
     <string name="sort_highest_rated_value">vote_average.desc</string>
     <string name="sort_preference_default">popularity.desc</string>
     <string name="sort_preference_key">sort</string>
+    <string name="title_activity_movie_details">Movie Details</string>
 
 </resources>

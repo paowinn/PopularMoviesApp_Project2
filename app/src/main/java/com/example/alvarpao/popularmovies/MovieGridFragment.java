@@ -1,5 +1,6 @@
 package com.example.alvarpao.popularmovies;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -44,6 +45,12 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
     private final static String PAGE_1 = "1";
+
+    public static final String EXTRA_IMAGE_URL = "com.example.alvarpao.popularmovies.IMAGE_URL";
+    public static final String EXTRA_ORIGINAL_TITLE = "com.example.alvarpao.popularmovies.ORIGINAL_TITLE";
+    public static final String EXTRA_PLOT_SYNOPSIS = "com.example.alvarpao.popularmovies.PLOT_SYNOPSIS";
+    public static final String EXTRA_USER_RATING = "com.example.alvarpao.popularmovies.USER_RATING";
+    public static final String EXTRA_RELEASE_DATE = "com.example.alvarpao.popularmovies.RELEASE_DATE";
 
 
     public MovieGridFragment() {
@@ -119,8 +126,15 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view,
                                     int position, long id) {
-                Toast.makeText(getActivity(), "" + position,
-                        Toast.LENGTH_SHORT).show();
+                Movie movie = mMovieAdapter.getItem(position);
+                Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
+                        .putExtra(EXTRA_IMAGE_URL, movie.getImageURL())
+                        .putExtra(EXTRA_ORIGINAL_TITLE, movie.getOriginalTitle())
+                        .putExtra(EXTRA_PLOT_SYNOPSIS, movie.getPlotSynopsis())
+                        .putExtra(EXTRA_USER_RATING, movie.getUserRating())
+                        .putExtra(EXTRA_RELEASE_DATE, movie.getReleaseDate());
+                startActivity(intent);
+
             }
         });
 
