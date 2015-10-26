@@ -35,11 +35,11 @@ import java.net.URL;
 import java.util.ArrayList;
 
 /**
- * A fragment containing a grid view of movie posters
+ * A fragment containing a grid view of movies
  */
 public class MovieGridFragment extends Fragment implements AbsListView.OnScrollListener{
 
-    private MoviePosterAdapter mPosterAdapter;
+    private MovieAdapter mMovieAdapter;
     private boolean mLoadingImages = true;
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
@@ -81,9 +81,9 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 editor.commit();
 
                 Toast.makeText(getActivity(), "Preference sort: " + sortArrayValues.getString(position), Toast.LENGTH_SHORT).show();
-                // Update posters to reflect new sort option selected by user
+                // Update movie grid to reflect new sort option selected by user
                 resetMovieGrid();
-                getPostersPaths();
+                getMovies();
 
             }
 
@@ -114,10 +114,10 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
         // The adapter is initialized with an empty array of movies until it gets data
         // from the website
-        mPosterAdapter = new MoviePosterAdapter(getActivity(), new ArrayList<MoviePoster>());
+        mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
 
         GridView moviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
-        moviesGridView.setAdapter(mPosterAdapter);
+        moviesGridView.setAdapter(mMovieAdapter);
 
         moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view,
@@ -127,7 +127,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             }
         });
 
-        //Handles pagination of movie posters
+        //Handles pagination for movie grid
         moviesGridView.setOnScrollListener(this);
 
         return rootView;
@@ -157,11 +157,11 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // the next scroll
         if (!mLoadingImages && (totalItemCount == (firstVisibleItem + visibleItemCount))) {
 
-            // Retrieve the preferred sort option to retrieve the posters in the appropriate order
+            // Retrieve the preferred sort option to get the movies in the appropriate order
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
                     getString(R.string.sort_preference_default));
-            new FetchPosterPathsTask().execute(paramSortValue, Integer.toString(mPageToFetch));
+            new FetchMoviesTask().execute(paramSortValue, Integer.toString(mPageToFetch));
             mLoadingImages = true;
         }
     }
@@ -176,7 +176,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     private void resetMovieGrid()
     {
         // Clear movie grid adapter
-        mPosterAdapter.clear();
+        mMovieAdapter.clear();
 
         // Reset scroll parameters
         mPageToFetch = 1;
@@ -185,20 +185,20 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
     }
 
-    private void getPostersPaths()
+    private void getMovies()
     {
-        FetchPosterPathsTask fetchPosterPathsTask = new FetchPosterPathsTask();
-        //Get the appropriate sort option to fetch the posters in the right order
+        FetchMoviesTask fetchMoviesTask = new FetchMoviesTask();
+        //Get the appropriate sort option to fetch the movies in the right order
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
                 getString(R.string.sort_preference_default));
-        fetchPosterPathsTask.execute(paramSortValue, "1");
+        fetchMoviesTask.execute(paramSortValue, "1");
     }
 
 
-    public class FetchPosterPathsTask extends AsyncTask<String, Void, String[]> {
+    public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
 
-        private final String LOG_TAG = FetchPosterPathsTask.class.getSimpleName();
+        private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
         final String DISCOVER_MOVIE_ENDPOINT_BASE_URL = "http://api.themoviedb.org/3/discover/movie";
         final String API_KEY_PARAMETER = "api_key";
         final String SORT_PARAMETER = "sort_by";
@@ -209,17 +209,22 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // have very few votes even though they are highly-rated.
         final String VOTE_COUNT_VALUE = "40";
 
-        private String[] getPosterPathsFromJson(String jsonReply) throws JSONException {
-            // Parse out only the poster path in the JSON reply for each movie.
-            // I used: https://jsonformatter.curiousconcept.com/ to format a
-            // given JSON response and be able to develop code to parse out poster_path
+        private Movie[] getMovieInfoFromJson(String jsonReply) throws JSONException {
+            // Parse out the required movie info from the JSON reply for each movie.
+            // I used: https://jsonformatter.curiousconcept.com/ to format a given
+            // JSON response and be able to develop code to parse out the required info
 
             // The JSON object returned contains a JSON array "results" which contains the
-            // info on each movie returned (including the poster_path)
+            // info on each movie returned
 
             final String RESULTS = "results";
             final String POSTER_PATH = "poster_path";
-            String[] posterPaths;
+            final String ORIGINAL_TITLE = "original_title";
+            final String PLOT_SYNOPSIS = "overview";
+            final String USER_RATING = "vote_average";
+            final String RELEASE_DATE = "release_date";
+
+            Movie[] movies;
 
             JSONObject movieDataJson = new JSONObject(jsonReply);
 
@@ -229,20 +234,24 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
             // Movie data is returned by pages. Each page contains info on 20 movies (except for
             // the last page.
-            posterPaths = new String[resultsArray.length()];
+            movies = new Movie[resultsArray.length()];
 
             for (int index = 0; index < resultsArray.length(); index++) {
                 JSONObject movieInfo = resultsArray.getJSONObject(index);
-                posterPaths[index] = movieInfo.getString(POSTER_PATH);
-                Log.v(LOG_TAG, "Poster Paths[" + Integer.toString(index) + "]: " + posterPaths[index]);
+                movies[index] = new Movie(buildImageURL(movieInfo.getString(POSTER_PATH)),
+                                          movieInfo.getString(ORIGINAL_TITLE),
+                                          movieInfo.getString(PLOT_SYNOPSIS),
+                                          movieInfo.getDouble(USER_RATING),
+                                          movieInfo.getString(RELEASE_DATE));
+                Log.v(LOG_TAG, "Poster Paths[" + Integer.toString(index) + "]: " + movieInfo.getString(POSTER_PATH));
             }
 
-            return posterPaths;
+            return movies;
 
         }
 
         @Override
-        protected String[] doInBackground(String... params) {
+        protected Movie[] doInBackground(String... params) {
 
             HttpURLConnection urlConnection = null;
             BufferedReader bufferedReader = null;
@@ -326,10 +335,10 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 }
             }
 
-            // Parse JSON response to extract the movie posters paths
+            // Parse JSON response to extract the movie required movie infor
             try {
 
-                return getPosterPathsFromJson(movieInfoJsonReply);
+                return getMovieInfoFromJson(movieInfoJsonReply);
             } catch (JSONException exception) {
                 Log.e(LOG_TAG, exception.getMessage(), exception);
                 exception.printStackTrace();
@@ -341,7 +350,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         private String buildImageURL(String posterPath)
         {
             // To build the complete URL for the movie poster you need to append a base path ahead
-            // of the poster_path (relative path) returned by the FetchPosterPathsTask. You then
+            // of the poster_path (relative path) returned by the FetchMoviesTask. You then
             // need to append the size and then finally the poster_path returned by the AsyncTask.
             // For more information check the Movie Database API in the configuration section
 
@@ -354,12 +363,12 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         }
 
         @Override
-        protected void onPostExecute(String[] posterPaths) {
+        protected void onPostExecute(Movie[] movies) {
 
-            if (posterPaths != null) {
+            if (movies != null) {
 
-                for(String posterPath : posterPaths) {
-                    mPosterAdapter.add(new MoviePoster(buildImageURL(posterPath)));
+                for(Movie movie : movies) {
+                    mMovieAdapter.add(movie);
                 }
             }
         }
