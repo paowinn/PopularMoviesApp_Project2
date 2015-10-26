@@ -43,6 +43,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     private boolean mLoadingMovies = true;
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
+    private final static String PAGE_1 = "1";
 
 
     public MovieGridFragment() {
@@ -83,7 +84,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 Toast.makeText(getActivity(), "Preference sort: " + sortArrayValues.getString(position), Toast.LENGTH_SHORT).show();
                 // Update movie grid to reflect new sort option selected by user
                 resetMovieGrid();
-                getMovies();
+                getMovies(PAGE_1);
 
             }
 
@@ -153,11 +154,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // the next scroll
         if (!mLoadingMovies && (totalItemCount == (firstVisibleItem + visibleItemCount))) {
 
-            // Retrieve the preferred sort option to get the movies in the appropriate order
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
-                    getString(R.string.sort_preference_default));
-            new FetchMoviesTask().execute(paramSortValue, Integer.toString(mPageToFetch));
+            getMovies(Integer.toString(mPageToFetch));
             mLoadingMovies = true;
         }
     }
@@ -181,14 +178,14 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
     }
 
-    private void getMovies()
+    private void getMovies(String pageToFetch)
     {
         FetchMoviesTask fetchMoviesTask = new FetchMoviesTask();
         //Get the appropriate sort option to fetch the movies in the right order
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
                 getString(R.string.sort_preference_default));
-        fetchMoviesTask.execute(paramSortValue, "1");
+        fetchMoviesTask.execute(paramSortValue, pageToFetch);
     }
 
 
