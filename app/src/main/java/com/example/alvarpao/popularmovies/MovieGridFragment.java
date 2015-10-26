@@ -81,8 +81,11 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 editor.commit();
 
                 Toast.makeText(getActivity(), "Preference sort: " + sortArrayValues.getString(position), Toast.LENGTH_SHORT).show();
-                //mPosterAdapter.clear();
                 // Update posters to reflect new sort option selected by user
+                mPosterAdapter.clear();
+                mPageToFetch = 1;
+                mLoadingImages = true;
+                mPreviousTotalItems = 0;
                 getPostersPaths();
 
 
@@ -193,6 +196,11 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         final String API_KEY_PARAMETER = "api_key";
         final String SORT_PARAMETER = "sort_by";
         final String PAGE_PARAMETER = "page";
+        final String VOTE_COUNT_PARAMETER = "vote_count.gte";
+        // The number 40 is based on Rotten Tomatoes website that considers 40 reviews (for limited
+        // released movies) in order for a movie to be certified fresh. This eliminates movies that
+        // have very few votes even though they are highly-rated.
+        final String VOTE_COUNT_VALUE = "40";
 
         private String[] getPosterPathsFromJson(String jsonReply) throws JSONException {
             // Parse out only the poster path in the JSON reply for each movie.
@@ -239,15 +247,21 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             }
 
             try {
-                //Construction of the URL query for the Movie Database
-                //More info about the API: http://docs.themoviedb.apiary.io/#
+                // Construction of the URL query for the Movie Database
+                // More info about the API: http://docs.themoviedb.apiary.io/#
 
-                Uri query = Uri.parse(DISCOVER_MOVIE_ENDPOINT_BASE_URL).buildUpon()
+                Uri.Builder uriQuery = Uri.parse(DISCOVER_MOVIE_ENDPOINT_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_PARAMETER, ApiKey.API_KEY)
                         .appendQueryParameter(SORT_PARAMETER, params[0])
-                        .appendQueryParameter(PAGE_PARAMETER, params[1])
-                        .build();
+                        .appendQueryParameter(PAGE_PARAMETER, params[1]);
 
+                // Adding this parameter eliminates getting highly-rated movies with very few votes.
+                // The minimum amount of votes I chose is based on a similar criteria used by rotten
+                // tomatoes (Certified Fresh)
+                if(params[0].equals(getString(R.string.sort_highest_rated_value)))
+                    uriQuery.appendQueryParameter(VOTE_COUNT_PARAMETER, VOTE_COUNT_VALUE);
+
+                Uri query = uriQuery.build();
                 URL queryUrl = new URL(query.toString());
 
                 // Creating the GET request to the Movie Database and then open
