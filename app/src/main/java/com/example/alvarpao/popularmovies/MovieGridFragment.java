@@ -40,7 +40,7 @@ import java.util.ArrayList;
 public class MovieGridFragment extends Fragment implements AbsListView.OnScrollListener{
 
     private MovieAdapter mMovieAdapter;
-    private boolean mLoadingImages = true;
+    private boolean mLoadingMovies = true;
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
 
@@ -141,12 +141,12 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // Since the onScroll method can get called several times at one time when the user is
         // scrolling, need to verify if the images are still loading before fetching another page
         // of results (loading it is first initialized as true)
-        if (mLoadingImages)
+        if (mLoadingMovies)
         {
             if (totalItemCount > mPreviousTotalItems)
             {
                 // Loading data to the grid view has been concluded
-                mLoadingImages = false;
+                mLoadingMovies = false;
                 mPreviousTotalItems = totalItemCount;
                 mPageToFetch++;
             }
@@ -155,14 +155,14 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // In order for the next page to be fetched, the previous page has to be loaded and
         // the user has scrolled enough far down that there will be no more items to display in
         // the next scroll
-        if (!mLoadingImages && (totalItemCount == (firstVisibleItem + visibleItemCount))) {
+        if (!mLoadingMovies && (totalItemCount == (firstVisibleItem + visibleItemCount))) {
 
             // Retrieve the preferred sort option to get the movies in the appropriate order
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
                     getString(R.string.sort_preference_default));
             new FetchMoviesTask().execute(paramSortValue, Integer.toString(mPageToFetch));
-            mLoadingImages = true;
+            mLoadingMovies = true;
         }
     }
 
@@ -180,7 +180,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
         // Reset scroll parameters
         mPageToFetch = 1;
-        mLoadingImages = true;
+        mLoadingMovies = true;
         mPreviousTotalItems = 0;
 
     }
