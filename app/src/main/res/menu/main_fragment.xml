@@ -5,8 +5,4 @@
         android:title="@string/action_sort"
         app:showAsAction="ifRoom"
         app:actionLayout="@layout/action_sort" />
-    <item
-        android:id="@+id/action_refresh"
-        android:title="@string/action_refresh"
-        app:showAsAction="never" />
 </menu>
