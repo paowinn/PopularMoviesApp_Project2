@@ -12,17 +12,17 @@ public class Movie {
     private String originalTitle;
     private String plotSynopsis;
     private double userRating;
-    private String releaseDate;
+    private String releaseYear;
 
     public Movie(long id, String imageURL, String originalTitle, String plotSynopsis, double userRating,
-                 String releaseDate)
+                 String releaseYear)
     {
         this.id = id;
         this.imageURL = imageURL;
         this.originalTitle = originalTitle;
         this.plotSynopsis = plotSynopsis;
         this.userRating = userRating;
-        this.releaseDate = releaseDate;
+        this.releaseYear = releaseYear;
     }
 
     public long getId(){ return id; }
@@ -35,6 +35,6 @@ public class Movie {
 
     public double getUserRating(){ return userRating; }
 
-    public String getReleaseDate(){ return releaseDate; }
+    public String getReleaseYear(){ return releaseYear; }
 
 }

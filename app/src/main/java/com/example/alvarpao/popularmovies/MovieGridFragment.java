@@ -55,7 +55,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     public static final String EXTRA_ORIGINAL_TITLE = "com.example.alvarpao.popularmovies.ORIGINAL_TITLE";
     public static final String EXTRA_PLOT_SYNOPSIS = "com.example.alvarpao.popularmovies.PLOT_SYNOPSIS";
     public static final String EXTRA_USER_RATING = "com.example.alvarpao.popularmovies.USER_RATING";
-    public static final String EXTRA_RELEASE_DATE = "com.example.alvarpao.popularmovies.RELEASE_DATE";
+    public static final String EXTRA_RELEASE_YEAR = "com.example.alvarpao.popularmovies.RELEASE_YEAR";
 
 
     public MovieGridFragment() {
@@ -138,7 +138,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                         .putExtra(EXTRA_ORIGINAL_TITLE, movie.getOriginalTitle())
                         .putExtra(EXTRA_PLOT_SYNOPSIS, movie.getPlotSynopsis())
                         .putExtra(EXTRA_USER_RATING, movie.getUserRating())
-                        .putExtra(EXTRA_RELEASE_DATE, movie.getReleaseDate());
+                        .putExtra(EXTRA_RELEASE_YEAR, movie.getReleaseYear());
                 startActivity(intent);
 
             }

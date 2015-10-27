@@ -37,12 +37,12 @@ public class MovieDetailActivity extends ActionBarActivity{
     public static class MovieDetailFragment extends Fragment {
 
         private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
-        
+
         private String mImageURL;
         private String mOriginalTitle;
         private String mPlotSynopsis;
         private double mUserRating;
-        private String mReleaseDate;
+        private String mReleaseYear;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,9 +84,9 @@ public class MovieDetailActivity extends ActionBarActivity{
                     ((TextView)rootView.findViewById(R.id.userRating)).setText(Double.valueOf(mUserRating).toString());
                 }
 
-                if(intent.hasExtra(MovieGridFragment.EXTRA_RELEASE_DATE)){
-                    mReleaseDate = intent.getStringExtra(MovieGridFragment.EXTRA_RELEASE_DATE);
-                    ((TextView)rootView.findViewById(R.id.releaseYear)).setText(mReleaseDate);
+                if(intent.hasExtra(MovieGridFragment.EXTRA_RELEASE_YEAR)){
+                    mReleaseYear = intent.getStringExtra(MovieGridFragment.EXTRA_RELEASE_YEAR);
+                    ((TextView)rootView.findViewById(R.id.releaseYear)).setText(mReleaseYear);
                 }
 
             }
