@@ -80,8 +80,8 @@ public class MovieDetailActivity extends ActionBarActivity{
                 }
 
                 if(intent.hasExtra(MovieGridFragment.EXTRA_USER_RATING)){
-                    mUserRating = intent.getDoubleExtra(MovieGridFragment.EXTRA_USER_RATING, 0.0);
-                    ((TextView)rootView.findViewById(R.id.userRating)).setText(Double.valueOf(mUserRating).toString());
+                    mUserRating = intent.getDoubleExtra(MovieGridFragment.EXTRA_USER_RATING, Double.parseDouble(getString(R.string.user_rating_default)));
+                    ((TextView)rootView.findViewById(R.id.userRating)).setText(Double.valueOf(mUserRating).toString() + getString(R.string.user_rating_of_ten));
                 }
 
                 if(intent.hasExtra(MovieGridFragment.EXTRA_RELEASE_YEAR)){

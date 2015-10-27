@@ -16,6 +16,8 @@
     <string name="duration">Duration</string>
     <string name="user_rating">User Rating</string>
     <string name="plot_synopsis">Plot Synopsis</string>
+    <string name="user_rating_default">0.0</string>
+    <string name="user_rating_of_ten">/10</string>
     <string name="mark_favorite">MARK AS FAVORITE</string>
 
 </resources>
