@@ -7,21 +7,25 @@ package com.example.alvarpao.popularmovies;
 
 public class Movie {
 
+    private long id;
     private String imageURL;
     private String originalTitle;
     private String plotSynopsis;
     private double userRating;
     private String releaseDate;
 
-    public Movie(String imageURL, String originalTitle, String plotSynopsis, double userRating,
+    public Movie(long id, String imageURL, String originalTitle, String plotSynopsis, double userRating,
                  String releaseDate)
     {
+        this.id = id;
         this.imageURL = imageURL;
         this.originalTitle = originalTitle;
         this.plotSynopsis = plotSynopsis;
         this.userRating = userRating;
         this.releaseDate = releaseDate;
     }
+
+    public long getId(){ return id; }
 
     public String getImageURL() { return imageURL; }
 

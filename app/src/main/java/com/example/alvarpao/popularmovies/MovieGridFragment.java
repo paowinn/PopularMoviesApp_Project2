@@ -33,7 +33,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * A fragment containing a grid view of movies
@@ -46,6 +50,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     private int mPreviousTotalItems = 0;
     private final static String PAGE_1 = "1";
 
+    public static final String EXTRA_ID = "com.example.alvarpao.popularmovies.ID";
     public static final String EXTRA_IMAGE_URL = "com.example.alvarpao.popularmovies.IMAGE_URL";
     public static final String EXTRA_ORIGINAL_TITLE = "com.example.alvarpao.popularmovies.ORIGINAL_TITLE";
     public static final String EXTRA_PLOT_SYNOPSIS = "com.example.alvarpao.popularmovies.PLOT_SYNOPSIS";
@@ -128,6 +133,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                                     int position, long id) {
                 Movie movie = mMovieAdapter.getItem(position);
                 Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
+                        .putExtra(EXTRA_ID, movie.getId())
                         .putExtra(EXTRA_IMAGE_URL, movie.getImageURL())
                         .putExtra(EXTRA_ORIGINAL_TITLE, movie.getOriginalTitle())
                         .putExtra(EXTRA_PLOT_SYNOPSIS, movie.getPlotSynopsis())
@@ -211,12 +217,13 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         final String SORT_PARAMETER = "sort_by";
         final String PAGE_PARAMETER = "page";
         final String VOTE_COUNT_PARAMETER = "vote_count.gte";
+
         // The number 40 is based on Rotten Tomatoes website that considers 40 reviews (for limited
         // released movies) in order for a movie to be certified fresh. This eliminates movies that
         // have very few votes even though they are highly-rated.
         final String VOTE_COUNT_VALUE = "40";
 
-        private Movie[] getMovieInfoFromJson(String jsonReply) throws JSONException {
+        private Movie[] getMovieInfoFromJson(String jsonReply) throws JSONException, ParseException{
             // Parse out the required movie info from the JSON reply for each movie.
             // I used: https://jsonformatter.curiousconcept.com/ to format a given
             // JSON response and be able to develop code to parse out the required info
@@ -225,14 +232,17 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             // info on each movie returned
 
             final String RESULTS = "results";
+            final String ID = "id";
             final String POSTER_PATH = "poster_path";
             final String ORIGINAL_TITLE = "original_title";
             final String PLOT_SYNOPSIS = "overview";
             final String USER_RATING = "vote_average";
             final String RELEASE_DATE = "release_date";
 
-            Movie[] movies;
+            SimpleDateFormat releaseDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar calendar = Calendar.getInstance();
 
+            Movie[] movies;
             JSONObject movieDataJson = new JSONObject(jsonReply);
 
             // The results array returns info on all the movies sorted by either popularity or
@@ -243,13 +253,21 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             // the last page.
             movies = new Movie[resultsArray.length()];
 
-            for (int index = 0; index < resultsArray.length(); index++) {
+            for (int index = 0; index < resultsArray.length(); index++)
+            {
                 JSONObject movieInfo = resultsArray.getJSONObject(index);
-                movies[index] = new Movie(buildImageURL(movieInfo.getString(POSTER_PATH)),
+
+                // To match the UX mockups, get the release date from the JSON object and
+                // extract the year from it to save it in the movie object
+                Date releaseDate = releaseDateFormat.parse(movieInfo.getString(RELEASE_DATE));
+                calendar.setTime(releaseDate);
+
+                movies[index] = new Movie(movieInfo.getLong(ID),
+                        buildImageURL(movieInfo.getString(POSTER_PATH)),
                                           movieInfo.getString(ORIGINAL_TITLE),
                                           movieInfo.getString(PLOT_SYNOPSIS),
                                           movieInfo.getDouble(USER_RATING),
-                                          movieInfo.getString(RELEASE_DATE));
+                                          Integer.toString(calendar.get(Calendar.YEAR)));
                 Log.v(LOG_TAG, "Poster Paths[" + Integer.toString(index) + "]: " + movieInfo.getString(POSTER_PATH));
             }
 
@@ -346,7 +364,14 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             try {
 
                 return getMovieInfoFromJson(movieInfoJsonReply);
-            } catch (JSONException exception) {
+            }
+
+            catch (JSONException exception) {
+                Log.e(LOG_TAG, exception.getMessage(), exception);
+                exception.printStackTrace();
+            }
+
+            catch(ParseException exception) {
                 Log.e(LOG_TAG, exception.getMessage(), exception);
                 exception.printStackTrace();
             }
