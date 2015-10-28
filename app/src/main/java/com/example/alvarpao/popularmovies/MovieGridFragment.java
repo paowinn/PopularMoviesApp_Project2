@@ -48,7 +48,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     private boolean mLoadingMovies = true;
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
-    private final static String PAGE_1 = "1";
+    private static final String PAGE_1 = "1";
 
     public static final String EXTRA_ID = "com.example.alvarpao.popularmovies.ID";
     public static final String EXTRA_IMAGE_URL = "com.example.alvarpao.popularmovies.IMAGE_URL";
