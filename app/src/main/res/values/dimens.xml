@@ -1,5 +1,4 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="fragment_gridview_column_width">150dp</dimen>
     <dimen name="fragment_gridview_vertical_spacing">0dp</dimen>
     <dimen name="fragment_gridview_horizontal_spacing">0dp</dimen>

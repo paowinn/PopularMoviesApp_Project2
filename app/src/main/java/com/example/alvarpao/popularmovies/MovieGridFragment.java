@@ -1,6 +1,5 @@
 package com.example.alvarpao.popularmovies;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -56,6 +55,16 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     public static final String EXTRA_PLOT_SYNOPSIS = "com.example.alvarpao.popularmovies.PLOT_SYNOPSIS";
     public static final String EXTRA_USER_RATING = "com.example.alvarpao.popularmovies.USER_RATING";
     public static final String EXTRA_RELEASE_YEAR = "com.example.alvarpao.popularmovies.RELEASE_YEAR";
+
+
+    // This is an interface that the MainActivity containing the MovieGridFragment has to implement
+    // in order for the fragment to notify the activity when a movie has been selected
+    public interface Callback {
+
+        // The MainActivity will have to implement this method
+        public void onItemSelected(long movieId, String imageURL, String originalTitle,
+                                   String plotSynopis, double userRating, String releaseYear);
+    }
 
 
     public MovieGridFragment() {
@@ -132,6 +141,16 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             public void onItemClick(AdapterView<?> adapterView, View view,
                                     int position, long id) {
                 Movie movie = mMovieAdapter.getItem(position);
+
+                // A movie has been selected so the MainActivity has to be notified to take
+                // appropriate action
+                ((Callback) getActivity()).onItemSelected(movie.getId(),
+                        movie.getImageURL(),
+                        movie.getOriginalTitle(),
+                        movie.getPlotSynopsis(),
+                        movie.getUserRating(),
+                        movie.getReleaseYear());
+                /*
                 Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
                         .putExtra(EXTRA_ID, movie.getId())
                         .putExtra(EXTRA_IMAGE_URL, movie.getImageURL())
@@ -140,6 +159,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                         .putExtra(EXTRA_USER_RATING, movie.getUserRating())
                         .putExtra(EXTRA_RELEASE_YEAR, movie.getReleaseYear());
                 startActivity(intent);
+                */
 
             }
         });

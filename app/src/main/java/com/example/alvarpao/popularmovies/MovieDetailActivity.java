@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -25,7 +26,7 @@ public class MovieDetailActivity extends ActionBarActivity{
 
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new MovieDetailFragment())
+                    .add(R.id.movie_details_container, new MovieDetailFragment())
                     .commit();
         }
 
@@ -54,6 +55,20 @@ public class MovieDetailActivity extends ActionBarActivity{
             // Since this activity was started via an Intent. Inspect the intent to get the
             // passed movie info
             Intent intent = getActivity().getIntent();
+
+            // Also get the fragmnent's arguments in case the fragment has been created when in
+            // two-pane mode. If that is the case, retrieve the selected movie's info from the
+            // arguments not the intent.
+            Bundle arguments = getArguments();
+
+            Toast.makeText(getActivity(), "En Movie Detail", Toast.LENGTH_SHORT).show();
+
+            if(arguments == null)
+                Toast.makeText(getActivity(), "Arguments are NULL", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(getActivity(), "Arguments are NOT NULL", Toast.LENGTH_SHORT).show();
+
+
             if(intent != null)
             {
 
@@ -90,6 +105,34 @@ public class MovieDetailActivity extends ActionBarActivity{
                     ((TextView)rootView.findViewById(R.id.releaseYear)).setText(mReleaseYear);
                 }
 
+            }
+
+            if(arguments != null)
+            {
+                    mImageURL = arguments.getString(MovieGridFragment.EXTRA_IMAGE_URL);
+                    ImageView moviePoster = ((ImageView)rootView.findViewById(R.id.moviePoster));
+
+                    //Using Picasso open source library to facilitate loading images and caching
+                    Picasso.with(getContext())
+                            .load(mImageURL)
+                            .placeholder(R.drawable.image_loading)
+                            .error(R.drawable.error_loading_image)
+                            .into(moviePoster);
+
+
+                    mOriginalTitle = arguments.getString(MovieGridFragment.EXTRA_ORIGINAL_TITLE);
+                    ((TextView)rootView.findViewById(R.id.originalTitle)).setText(mOriginalTitle);
+
+                    Toast.makeText(getActivity(), mOriginalTitle, Toast.LENGTH_SHORT).show();
+
+                    mPlotSynopsis = arguments.getString(MovieGridFragment.EXTRA_PLOT_SYNOPSIS);
+                    ((TextView)rootView.findViewById(R.id.plotSynopsis)).setText(mPlotSynopsis);
+
+                    mUserRating = arguments.getDouble(MovieGridFragment.EXTRA_USER_RATING, Double.parseDouble(getString(R.string.user_rating_default)));
+                    ((TextView)rootView.findViewById(R.id.userRating)).setText(Double.valueOf(mUserRating).toString() + getString(R.string.user_rating_of_ten));
+
+                    mReleaseYear = arguments.getString(MovieGridFragment.EXTRA_RELEASE_YEAR);
+                    ((TextView)rootView.findViewById(R.id.releaseYear)).setText(mReleaseYear);
             }
 
             return rootView;

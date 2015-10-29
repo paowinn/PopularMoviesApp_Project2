@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:divider="?android:attr/dividerHorizontal"
+    tools:context="com.example.alvarpao.popularmovies.MainActivity">
+
+    <!-- This layout represents a two-pane layout. On the left the main fragment (Movie Grid),
+     on the right the details fragment (Movie Details) -->
+
+    <fragment
+        android:id="@+id/movie_grid_fragment"
+        android:name="com.example.alvarpao.popularmovies.MovieGridFragment"
+        android:layout_width="@dimen/movie_grid_fragment_layout_width"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        tools:layout="@android:layout/list_content" />
+
+    <FrameLayout
+        android:id="@+id/movie_details_container"
+        android:layout_width="@dimen/movie_details_fragment_layout_width"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+</LinearLayout>

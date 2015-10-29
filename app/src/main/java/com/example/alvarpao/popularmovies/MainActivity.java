@@ -1,23 +1,50 @@
 package com.example.alvarpao.popularmovies;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements MovieGridFragment.Callback {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final String MOVIE_DETAILS_FRAGMENT_TAG = "MOVIE_DETAILS_FRAG_TAG";
+    private boolean mTwoPaneLayout;
+    private String mSortOption;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
+
+        //Retrieving the user's preferred sort option as save it as a member variable
+        mSortOption = getPreferredSortOption();
+
+        // The movie grid fragment is static now. The only dynamic fragment is the movie details
+        // fragment, this to accommodate a two-pane layout in sw720dp and larger
         setContentView(R.layout.activity_main);
-        if(savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new MovieGridFragment())
-                    .commit();
+
+        if(findViewById(R.id.movie_details_container) != null) {
+            // If this view is present it means that the app is displaying the layout for large
+            // screens (sw720dp). So the activity should be displayed in two-pane mode.
+            // Replace the movie details fragment accordingly when in two-pane mode.
+
+            mTwoPaneLayout = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movie_details_container,
+                                new MovieDetailActivity.MovieDetailFragment(), MOVIE_DETAILS_FRAGMENT_TAG)
+                        .commit();
+            }
         }
+
+        // Activity must be in one-pane layout (handsets or tablets 600dp or smaller)
+        else
+            mTwoPaneLayout = false;
+
     }
 
 
@@ -40,5 +67,60 @@ public class MainActivity extends ActionBarActivity {
             return true;
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private String getPreferredSortOption()
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        return preferences.getString(getString(R.string.sort_preference_key),
+                getString(R.string.sort_preference_default));
+    }
+
+
+    // The MainActivity now implements a Callback for the MovieGridFragment so this fragment
+    // can notify the activity when a movie was selected
+    @Override
+    public void onItemSelected(long movieId, String imageURL, String originalTitle,
+                               String plotSynopsis, double userRating, String releaseYear)
+    {
+        if (mTwoPaneLayout)
+        {
+            // In two-pane mode, show the movie details by replacing the MovieDetailFragment
+            // using a fragment transaction.
+
+            Bundle args = new Bundle();
+            //Bundle up the select movie's details and pass them as arguments for the fragment
+            args.putLong(MovieGridFragment.EXTRA_ID, movieId);
+                    args.putString(MovieGridFragment.EXTRA_IMAGE_URL, imageURL);
+                    args.putString(MovieGridFragment.EXTRA_ORIGINAL_TITLE, originalTitle);
+                    args.putString(MovieGridFragment.EXTRA_PLOT_SYNOPSIS, plotSynopsis);
+                    args.putDouble(MovieGridFragment.EXTRA_USER_RATING, userRating);
+                    args.putString(MovieGridFragment.EXTRA_RELEASE_YEAR, releaseYear);
+
+            MovieDetailActivity.MovieDetailFragment detailsFragment =
+                    new MovieDetailActivity.MovieDetailFragment();
+            detailsFragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_details_container, detailsFragment,
+                            MOVIE_DETAILS_FRAGMENT_TAG)
+                    .commit();
+        }
+
+        else
+        {
+            // When in one-pane layout just start a new MovieDetailActivity and pass the selected
+            // movie's info to display it in a different screen
+            Intent intent = new Intent(this, MovieDetailActivity.class);
+            intent.putExtra(MovieGridFragment.EXTRA_ID, movieId)
+                    .putExtra(MovieGridFragment.EXTRA_IMAGE_URL, imageURL)
+                    .putExtra(MovieGridFragment.EXTRA_ORIGINAL_TITLE, originalTitle)
+                    .putExtra(MovieGridFragment.EXTRA_PLOT_SYNOPSIS, plotSynopsis)
+                    .putExtra(MovieGridFragment.EXTRA_USER_RATING, userRating)
+                    .putExtra(MovieGridFragment.EXTRA_RELEASE_YEAR, releaseYear);
+
+            startActivity(intent);
+        }
     }
 }
