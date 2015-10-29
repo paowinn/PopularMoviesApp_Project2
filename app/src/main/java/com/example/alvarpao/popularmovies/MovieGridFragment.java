@@ -185,6 +185,23 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 // Loading data to the grid view has been concluded
                 mLoadingMovies = false;
                 mPreviousTotalItems = totalItemCount;
+
+                // Check if device is in two-pane mode. If that is the case and the first page
+                // being fetched is page 1 (as a result of a change in the sort option or when
+                // the app is first loaded) show an instance of the detail fragment with the
+                // info of the first movie in the returned list of movies
+                if( (mPageToFetch == 1) && ((MainActivity)getActivity()).getLayoutMode())
+                {
+                    Movie firstMovie = mMovieAdapter.getItem(0);
+
+                    ((Callback) getActivity()).onItemSelected(firstMovie.getId(),
+                            firstMovie.getImageURL(),
+                            firstMovie.getOriginalTitle(),
+                            firstMovie.getPlotSynopsis(),
+                            firstMovie.getUserRating(),
+                            firstMovie.getReleaseYear());
+                }
+
                 mPageToFetch++;
             }
         }

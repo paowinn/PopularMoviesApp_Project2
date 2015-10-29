@@ -77,6 +77,11 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
                 getString(R.string.sort_preference_default));
     }
 
+    public boolean getLayoutMode()
+    {
+        return mTwoPaneLayout;
+    }
+
 
     // The MainActivity now implements a Callback for the MovieGridFragment so this fragment
     // can notify the activity when a movie was selected
