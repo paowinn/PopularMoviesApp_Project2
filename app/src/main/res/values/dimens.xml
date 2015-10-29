@@ -11,6 +11,7 @@
     <dimen name="details_layout_left_margin">20dp</dimen>
     <dimen name="synopsis_left_margin">10dp</dimen>
     <dimen name="synopsis_right_margin">10dp</dimen>
+    <dimen name="synopsis_bottom_margin">20dp</dimen>
     <dimen name="synopsis_top_margin">20dp</dimen>
     <dimen name="details_info_left_margin">40dp</dimen>
     <dimen name="release_year_font_size">25sp</dimen>

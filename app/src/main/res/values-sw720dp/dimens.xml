@@ -13,6 +13,7 @@
     <dimen name="synopsis_left_margin">20dp</dimen>
     <dimen name="synopsis_right_margin">20dp</dimen>
     <dimen name="synopsis_top_margin">30dp</dimen>
+    <dimen name="synopsis_bottom_margin">40dp</dimen>
     <dimen name="details_info_left_margin">60dp</dimen>
     <dimen name="release_year_font_size">25sp</dimen>
     <dimen name="user_rating_font_size">12sp</dimen>

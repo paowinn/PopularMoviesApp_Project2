@@ -78,6 +78,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginLeft="@dimen/synopsis_left_margin"
             android:layout_marginTop="@dimen/synopsis_top_margin"
+            android:layout_marginBottom="@dimen/synopsis_bottom_margin"
             android:layout_marginRight="@dimen/synopsis_right_margin"
             android:textSize="@dimen/synopsis_font_size"
             android:gravity="left"/>
