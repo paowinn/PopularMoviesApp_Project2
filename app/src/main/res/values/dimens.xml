@@ -8,7 +8,7 @@
     <dimen name="original_title_padding_right">10dp</dimen>
     <dimen name="original_title_padding_bottom">40dp</dimen>
     <dimen name="layout_details_top_margin">10dp</dimen>
-    <dimen name="details_layout_left_margin">20dp</dimen>
+    <dimen name="layout_details_left_margin">20dp</dimen>
     <dimen name="synopsis_left_margin">10dp</dimen>
     <dimen name="synopsis_right_margin">10dp</dimen>
     <dimen name="synopsis_bottom_margin">20dp</dimen>
