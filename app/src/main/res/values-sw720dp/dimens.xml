@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="original_title_padding_bottom">70dp</dimen>
+    <dimen name="original_title_padding_top">40dp</dimen>
+    <dimen name="layout_details_top_margin">30dp</dimen>
+    <dimen name="synopsis_top_margin">40dp</dimen>
+</resources>
