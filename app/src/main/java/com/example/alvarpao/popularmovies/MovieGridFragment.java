@@ -48,6 +48,8 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
     private static final String PAGE_1 = "1";
+    private int mSelectedMoviePosition = GridView.INVALID_POSITION;
+    private int mSelectedSortPosition = Spinner.INVALID_POSITION;
 
     public static final String EXTRA_ID = "com.example.alvarpao.popularmovies.ID";
     public static final String EXTRA_IMAGE_URL = "com.example.alvarpao.popularmovies.IMAGE_URL";
@@ -55,6 +57,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     public static final String EXTRA_PLOT_SYNOPSIS = "com.example.alvarpao.popularmovies.PLOT_SYNOPSIS";
     public static final String EXTRA_USER_RATING = "com.example.alvarpao.popularmovies.USER_RATING";
     public static final String EXTRA_RELEASE_YEAR = "com.example.alvarpao.popularmovies.RELEASE_YEAR";
+    private static final String SELECTED_SORT_POSITION = "selected_sort_position";
 
 
     // This is an interface that the MainActivity containing the MovieGridFragment has to implement
@@ -102,6 +105,9 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                         sortArrayValues.getString(position));
                 editor.commit();
 
+                // Save the current position of the selected sort option
+                mSelectedSortPosition = position;
+
                 Toast.makeText(getActivity(), "Preference sort: " + sortArrayValues.getString(position), Toast.LENGTH_SHORT).show();
                 // Update movie grid to reflect new sort option selected by user
                 resetMovieGrid();
@@ -114,6 +120,13 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 //Do nothing
             }
         });
+
+        // This statement is needed to restore the state of the sort selection in case a screen
+        // rotation has occurred. The spinner is restored to the position it was retrieved
+        // from the savedInstanceState received in the onCreateView method (after onCreateView
+        // finishes onCreateOptionsMenu is called).
+        sortSpinner.setSelection(mSelectedSortPosition);
+
     }
 
     @Override
@@ -161,11 +174,19 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 startActivity(intent);
                 */
 
+                mSelectedMoviePosition = position;
+
             }
         });
 
         //Handles pagination for movie grid
         moviesGridView.setOnScrollListener(this);
+
+        // If a screen rotation occurred, the position of the sort selection in the spinner
+        // needs to be restored by retrieving the value from the savedInstanceState variable
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_SORT_POSITION))
+            mSelectedSortPosition = savedInstanceState.getInt(SELECTED_SORT_POSITION);
+
 
         return rootView;
     }
@@ -245,6 +266,27 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         fetchMoviesTask.execute(paramSortValue, pageToFetch);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // When a screen rotation occurs the selected position for the sort spinner needs to be
+        // saved to be restored later
+        if (mSelectedSortPosition != Spinner.INVALID_POSITION) {
+            savedInstanceState.putInt(SELECTED_SORT_POSITION, mSelectedSortPosition);
+        }
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    // This method is the equivalent of the onRestoreInstanceState method for activities
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_SORT_POSITION)) {
+            //If there was a screen rotation restore the saved state for the sort spinner
+            mSelectedSortPosition = savedInstanceState.getInt(SELECTED_SORT_POSITION);
+        }
+    }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
 
