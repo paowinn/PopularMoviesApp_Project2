@@ -17,5 +17,5 @@
     <dimen name="release_year_font_size">25sp</dimen>
     <dimen name="user_rating_font_size">12sp</dimen>
     <dimen name="user_rating_top_margin">2dp</dimen>
-    <dimen name="synopsis_font_size">13sp</dimen>
+    <dimen name="synopsis_font_size">14sp</dimen>
 </resources>
