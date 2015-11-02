@@ -20,7 +20,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,13 +42,14 @@ import java.util.Date;
  */
 public class MovieGridFragment extends Fragment implements AbsListView.OnScrollListener{
 
+    private GridView mMoviesGridView;
     private MovieAdapter mMovieAdapter;
+    private Spinner mSortSpinner;
     private boolean mLoadingMovies = true;
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
     private static final String PAGE_1 = "1";
-    private int mSelectedMoviePosition = GridView.INVALID_POSITION;
-    private int mSelectedSortPosition = Spinner.INVALID_POSITION;
+    private int mCurrentScrollPosition = GridView.INVALID_POSITION;
 
     public static final String EXTRA_ID = "com.example.alvarpao.popularmovies.ID";
     public static final String EXTRA_IMAGE_URL = "com.example.alvarpao.popularmovies.IMAGE_URL";
@@ -57,7 +57,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     public static final String EXTRA_PLOT_SYNOPSIS = "com.example.alvarpao.popularmovies.PLOT_SYNOPSIS";
     public static final String EXTRA_USER_RATING = "com.example.alvarpao.popularmovies.USER_RATING";
     public static final String EXTRA_RELEASE_YEAR = "com.example.alvarpao.popularmovies.RELEASE_YEAR";
-    private static final String SELECTED_SORT_POSITION = "selected_sort_position";
+    private static final String CURRENT_SCROLL_POSITION = "current_scroll_position";
 
 
     // This is an interface that the MainActivity containing the MovieGridFragment has to implement
@@ -91,8 +91,8 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         final TypedArray sortArrayValues = resources.obtainTypedArray(R.array.sort_options_values);
 
         MenuItem sortMenuItem = menu.findItem(R.id.sort_spinner);
-        Spinner sortSpinner = (Spinner) MenuItemCompat.getActionView(sortMenuItem);
-        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mSortSpinner = (Spinner) MenuItemCompat.getActionView(sortMenuItem);
+        mSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -101,14 +101,13 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 SharedPreferences sharedPreferences =
                         PreferenceManager.getDefaultSharedPreferences(getActivity());
                 SharedPreferences.Editor editor = sharedPreferences.edit();
+                //Save the sort_by value to query the movie database
                 editor.putString(getString(R.string.sort_preference_key),
                         sortArrayValues.getString(position));
+                // Save the current position of the selected sort option
+                editor.putInt(getString(R.string.sort_position_preference_key), position);
                 editor.commit();
 
-                // Save the current position of the selected sort option
-                mSelectedSortPosition = position;
-
-                Toast.makeText(getActivity(), "Preference sort: " + sortArrayValues.getString(position), Toast.LENGTH_SHORT).show();
                 // Update movie grid to reflect new sort option selected by user
                 resetMovieGrid();
                 getMovies(PAGE_1);
@@ -125,7 +124,12 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // rotation has occurred. The spinner is restored to the position it was retrieved
         // from the savedInstanceState received in the onCreateView method (after onCreateView
         // finishes onCreateOptionsMenu is called).
-        sortSpinner.setSelection(mSelectedSortPosition);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        int paramSortPosition = preferences.getInt(
+                getString(R.string.sort_position_preference_key),
+                0);
+        mSortSpinner.setSelection(paramSortPosition);
 
     }
 
@@ -147,10 +151,10 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // from the website
         mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
 
-        GridView moviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
-        moviesGridView.setAdapter(mMovieAdapter);
+        mMoviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
+        mMoviesGridView.setAdapter(mMovieAdapter);
 
-        moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mMoviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view,
                                     int position, long id) {
                 Movie movie = mMovieAdapter.getItem(position);
@@ -174,19 +178,22 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 startActivity(intent);
                 */
 
-                mSelectedMoviePosition = position;
-
             }
         });
 
         //Handles pagination for movie grid
-        moviesGridView.setOnScrollListener(this);
+        mMoviesGridView.setOnScrollListener(this);
 
-        // If a screen rotation occurred, the position of the sort selection in the spinner
-        // needs to be restored by retrieving the value from the savedInstanceState variable
-        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_SORT_POSITION))
-            mSelectedSortPosition = savedInstanceState.getInt(SELECTED_SORT_POSITION);
-
+        // If a screen rotation occurred, the scroll position in the movie grid needs to be restored
+        // by retrieving the value from the savedInstanceState variable
+        if (savedInstanceState != null)
+        {
+            if(savedInstanceState.containsKey(CURRENT_SCROLL_POSITION))
+            {
+                mCurrentScrollPosition = savedInstanceState.getInt(CURRENT_SCROLL_POSITION);
+                mMoviesGridView.smoothScrollToPosition(mCurrentScrollPosition);
+            }
+        }
 
         return rootView;
     }
@@ -243,7 +250,6 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // Needs to be part of the class, but no need to implement it for the movie grid
     }
 
-
     private void resetMovieGrid()
     {
         // Clear movie grid adapter
@@ -269,11 +275,12 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
-        // When a screen rotation occurs the selected position for the sort spinner needs to be
-        // saved to be restored later
-        if (mSelectedSortPosition != Spinner.INVALID_POSITION) {
-            savedInstanceState.putInt(SELECTED_SORT_POSITION, mSelectedSortPosition);
+        // When a screen rotation occurs the scroll position needs to be saved to be restored later
+        if (mCurrentScrollPosition != GridView.INVALID_POSITION) {
+            savedInstanceState.putInt(CURRENT_SCROLL_POSITION,
+                    mMoviesGridView.getFirstVisiblePosition());
         }
+
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -282,10 +289,16 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     public void onActivityCreated(Bundle savedInstanceState) {
 
         super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_SORT_POSITION)) {
-            //If there was a screen rotation restore the saved state for the sort spinner
-            mSelectedSortPosition = savedInstanceState.getInt(SELECTED_SORT_POSITION);
+
+        if (savedInstanceState != null)
+        {
+            if(savedInstanceState.containsKey(CURRENT_SCROLL_POSITION)) {
+                //If there was a screen rotation restore the saved scroll position
+                mCurrentScrollPosition = savedInstanceState.getInt(CURRENT_SCROLL_POSITION);
+            }
+
         }
+
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {

@@ -22,6 +22,7 @@
 
     <!-- Key name to get sort preference from Shared Preferences -->
     <string name="sort_preference_key" translatable="false">sort</string>
+    <string name="sort_position_preference_key" translatable="false">sort_position</string>
 
     <!-- Placeholder strings to help with the use of design view for movie_detail_fragment.xml -->
     <string name="original_title">Original Title</string>
