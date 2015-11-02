@@ -65,8 +65,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     public interface Callback {
 
         // The MainActivity will have to implement this method
-        public void onItemSelected(long movieId, String imageURL, String originalTitle,
-                                   String plotSynopis, double userRating, String releaseYear);
+        public void onItemSelected(Movie movie);
     }
 
 
@@ -161,22 +160,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
                 // A movie has been selected so the MainActivity has to be notified to take
                 // appropriate action
-                ((Callback) getActivity()).onItemSelected(movie.getId(),
-                        movie.getImageURL(),
-                        movie.getOriginalTitle(),
-                        movie.getPlotSynopsis(),
-                        movie.getUserRating(),
-                        movie.getReleaseYear());
-                /*
-                Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
-                        .putExtra(EXTRA_ID, movie.getId())
-                        .putExtra(EXTRA_IMAGE_URL, movie.getImageURL())
-                        .putExtra(EXTRA_ORIGINAL_TITLE, movie.getOriginalTitle())
-                        .putExtra(EXTRA_PLOT_SYNOPSIS, movie.getPlotSynopsis())
-                        .putExtra(EXTRA_USER_RATING, movie.getUserRating())
-                        .putExtra(EXTRA_RELEASE_YEAR, movie.getReleaseYear());
-                startActivity(intent);
-                */
+                ((Callback) getActivity()).onItemSelected(movie);
 
             }
         });
@@ -222,12 +206,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 {
                     Movie firstMovie = mMovieAdapter.getItem(0);
 
-                    ((Callback) getActivity()).onItemSelected(firstMovie.getId(),
-                            firstMovie.getImageURL(),
-                            firstMovie.getOriginalTitle(),
-                            firstMovie.getPlotSynopsis(),
-                            firstMovie.getUserRating(),
-                            firstMovie.getReleaseYear());
+                    ((Callback) getActivity()).onItemSelected(firstMovie);
                 }
 
                 mPageToFetch++;

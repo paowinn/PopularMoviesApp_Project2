@@ -86,8 +86,7 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
     // The MainActivity now implements a Callback for the MovieGridFragment so this fragment
     // can notify the activity when a movie was selected
     @Override
-    public void onItemSelected(long movieId, String imageURL, String originalTitle,
-                               String plotSynopsis, double userRating, String releaseYear)
+    public void onItemSelected(Movie movie)
     {
         if (mTwoPaneLayout)
         {
@@ -96,12 +95,12 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
 
             Bundle args = new Bundle();
             //Bundle up the select movie's details and pass them as arguments for the fragment
-            args.putLong(MovieGridFragment.EXTRA_ID, movieId);
-                    args.putString(MovieGridFragment.EXTRA_IMAGE_URL, imageURL);
-                    args.putString(MovieGridFragment.EXTRA_ORIGINAL_TITLE, originalTitle);
-                    args.putString(MovieGridFragment.EXTRA_PLOT_SYNOPSIS, plotSynopsis);
-                    args.putDouble(MovieGridFragment.EXTRA_USER_RATING, userRating);
-                    args.putString(MovieGridFragment.EXTRA_RELEASE_YEAR, releaseYear);
+            args.putLong(MovieGridFragment.EXTRA_ID, movie.getId());
+                    args.putString(MovieGridFragment.EXTRA_IMAGE_URL, movie.getImageURL());
+                    args.putString(MovieGridFragment.EXTRA_ORIGINAL_TITLE, movie.getOriginalTitle());
+                    args.putString(MovieGridFragment.EXTRA_PLOT_SYNOPSIS, movie.getPlotSynopsis());
+                    args.putDouble(MovieGridFragment.EXTRA_USER_RATING, movie.getUserRating());
+                    args.putString(MovieGridFragment.EXTRA_RELEASE_YEAR, movie.getReleaseYear());
 
             MovieDetailActivity.MovieDetailFragment detailsFragment =
                     new MovieDetailActivity.MovieDetailFragment();
@@ -118,12 +117,12 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
             // When in one-pane layout just start a new MovieDetailActivity and pass the selected
             // movie's info to display it in a different screen
             Intent intent = new Intent(this, MovieDetailActivity.class);
-            intent.putExtra(MovieGridFragment.EXTRA_ID, movieId)
-                    .putExtra(MovieGridFragment.EXTRA_IMAGE_URL, imageURL)
-                    .putExtra(MovieGridFragment.EXTRA_ORIGINAL_TITLE, originalTitle)
-                    .putExtra(MovieGridFragment.EXTRA_PLOT_SYNOPSIS, plotSynopsis)
-                    .putExtra(MovieGridFragment.EXTRA_USER_RATING, userRating)
-                    .putExtra(MovieGridFragment.EXTRA_RELEASE_YEAR, releaseYear);
+            intent.putExtra(MovieGridFragment.EXTRA_ID, movie.getId())
+                    .putExtra(MovieGridFragment.EXTRA_IMAGE_URL, movie.getImageURL())
+                    .putExtra(MovieGridFragment.EXTRA_ORIGINAL_TITLE, movie.getOriginalTitle())
+                    .putExtra(MovieGridFragment.EXTRA_PLOT_SYNOPSIS, movie.getPlotSynopsis())
+                    .putExtra(MovieGridFragment.EXTRA_USER_RATING, movie.getUserRating())
+                    .putExtra(MovieGridFragment.EXTRA_RELEASE_YEAR, movie.getReleaseYear());
 
             startActivity(intent);
         }

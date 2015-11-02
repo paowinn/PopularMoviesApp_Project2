@@ -61,14 +61,6 @@ public class MovieDetailActivity extends ActionBarActivity{
             // arguments not the intent.
             Bundle arguments = getArguments();
 
-            Toast.makeText(getActivity(), "En Movie Detail", Toast.LENGTH_SHORT).show();
-
-            if(arguments == null)
-                Toast.makeText(getActivity(), "Arguments are NULL", Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(getActivity(), "Arguments are NOT NULL", Toast.LENGTH_SHORT).show();
-
-
             if(intent != null)
             {
 
