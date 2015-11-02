@@ -35,4 +35,7 @@
     <!-- Added to the value retrieved for user rating to show the user the maximum rating possible -->
     <string name="user_rating_of_ten" translatable="false">/10</string>
 
+    <!-- Displayed error for when the device doesn't have an active internet connection -->
+    <string name="no_internet_error">Please make sure that your internet connection is active</string>
+
 </resources>

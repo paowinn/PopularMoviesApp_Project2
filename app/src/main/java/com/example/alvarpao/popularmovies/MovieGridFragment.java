@@ -20,6 +20,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -376,18 +377,30 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 Uri query = uriQuery.build();
                 URL queryUrl = new URL(query.toString());
 
-                // Creating the GET request to the Movie Database and then open
-                // a HTTP connection
-                urlConnection = (HttpURLConnection) queryUrl.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
+                InputStream inputStream;
+                StringBuffer receiveBuffer;
 
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer receiveBuffer = new StringBuffer();
+                // Determine if the device has an internet connection
+                if(((MainActivity)getActivity()).deviceIsConnected())
+                {
+                    // Creating the GET request to the Movie Database and then open
+                    // a HTTP connection
+                    urlConnection = (HttpURLConnection) queryUrl.openConnection();
+                    urlConnection.setRequestMethod("GET");
+                    urlConnection.connect();
 
-                if (inputStream == null) {
-                    return null;
+                    inputStream = urlConnection.getInputStream();
+                    receiveBuffer = new StringBuffer();
+
+
+                    if (inputStream == null) {
+                        return null;
+                    }
                 }
+
+                // Device doesn't have an internet connection
+                else
+                  return null;
 
                 // Preparing to read JSON response line by line
                 bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -474,6 +487,11 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                     mMovieAdapter.add(movie);
                 }
             }
+
+            else if(movies == null && !((MainActivity)getActivity()).deviceIsConnected())
+                Toast.makeText(getActivity(), getString(R.string.no_internet_error),
+                        Toast.LENGTH_SHORT).show();
+
         }
 
     }
