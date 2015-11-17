@@ -32,6 +32,11 @@ public class MovieDetailActivity extends ActionBarActivity{
 
     }
 
+    public void markFavorite(View view)
+    {
+        Toast.makeText(this, "FAVORITE", Toast.LENGTH_SHORT).show();
+    }
+
     /**
      * Movie fragment containing the movie details info
      */
@@ -130,6 +135,8 @@ public class MovieDetailActivity extends ActionBarActivity{
             return rootView;
 
         }
+
+
     }
 
 }

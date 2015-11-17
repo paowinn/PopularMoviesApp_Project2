@@ -66,6 +66,17 @@
                     android:textStyle="bold"
                     android:layout_marginTop="@dimen/user_rating_top_margin"/>
 
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/star"
+                    android:id="@+id/imageButton"
+                    android:onClick="markFavorite"
+                    android:layout_marginLeft="@dimen/left_margin_favorite_button"
+                    android:paddingLeft="@dimen/left_padding_favorite_button"
+                    android:scaleType="fitStart"
+                    style="@style/Widget.AppCompat.Button.Borderless"/>
+
             </LinearLayout>
         </LinearLayout>
 

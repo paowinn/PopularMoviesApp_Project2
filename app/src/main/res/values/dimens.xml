@@ -18,4 +18,6 @@
     <dimen name="user_rating_font_size">12sp</dimen>
     <dimen name="user_rating_top_margin">2dp</dimen>
     <dimen name="synopsis_font_size">14sp</dimen>
+    <dimen name="left_margin_favorite_button">0dp</dimen>
+    <dimen name="left_padding_favorite_button">0dp</dimen>
 </resources>
