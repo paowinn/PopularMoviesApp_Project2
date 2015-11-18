@@ -18,8 +18,9 @@ public class Movie implements Parcelable {
     private String plotSynopsis;
     private double userRating;
     private String releaseYear;
-    private ArrayList<Trailer> trailers;
-    private ArrayList<Review> reviews;
+    private int runtime;
+    ArrayList<Trailer> trailers;
+    ArrayList<Review> reviews;
 
     public Movie(long id, String imageURL, String originalTitle, String plotSynopsis, double userRating,
                  String releaseYear)
@@ -30,6 +31,7 @@ public class Movie implements Parcelable {
         this.plotSynopsis = plotSynopsis;
         this.userRating = userRating;
         this.releaseYear = releaseYear;
+        runtime = 0;
         trailers = new ArrayList<Trailer>();
         reviews = new ArrayList<Review>();
     }
@@ -41,6 +43,7 @@ public class Movie implements Parcelable {
         plotSynopsis = in.readString();
         userRating = in.readDouble();
         releaseYear = in.readString();
+        runtime = in.readInt();
         trailers = (ArrayList<Trailer>) in.readArrayList(Trailer.class.getClassLoader());
         reviews = (ArrayList<Review>) in.readArrayList(Review.class.getClassLoader());
     }
@@ -52,6 +55,7 @@ public class Movie implements Parcelable {
         parcel.writeString(plotSynopsis);
         parcel.writeDouble(userRating);
         parcel.writeString(releaseYear);
+        parcel.writeInt(runtime);
         parcel.writeList(trailers);
         parcel.writeList(reviews);
     }
@@ -86,12 +90,9 @@ public class Movie implements Parcelable {
 
     public String getReleaseYear(){ return releaseYear; }
 
-    public void setTrailers(ArrayList<Trailer> trailers) {
-        this.trailers = trailers;
-    }
+    public void setRuntime(int runtime){ this.runtime = runtime; }
 
-    public void setReviews(ArrayList<Review> reviews) {
-        this.reviews = reviews;
-    }
+    public int getRuntime(){ return runtime; }
+
 
 }

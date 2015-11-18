@@ -27,6 +27,7 @@
     <!-- Placeholder strings to help with the use of design view for movie_detail_fragment.xml -->
     <string name="original_title">Original Title</string>
     <string name="release_year">Release Year</string>
+    <string name="runtime">Runtime</string>
     <string name="user_rating">User Rating</string>
     <string name="plot_synopsis">Plot Synopsis</string>
 
@@ -34,6 +35,9 @@
 
     <!-- Added to the value retrieved for user rating to show the user the maximum rating possible -->
     <string name="user_rating_of_ten" translatable="false">/10</string>
+
+    <!-- Added to the value retrieved for runtime -->
+    <string name="runtime_units">min</string>
 
     <!-- Displayed error for when the device doesn't have an active internet connection -->
     <string name="no_internet_error">Please make sure that your internet connection is active</string>

@@ -13,6 +13,7 @@
     <dimen name="synopsis_bottom_margin">40dp</dimen>
     <dimen name="details_info_left_margin">60dp</dimen>
     <dimen name="release_year_font_size">35sp</dimen>
+    <dimen name="runtime_font_size">26sp</dimen>
     <dimen name="user_rating_font_size">14sp</dimen>
     <dimen name="user_rating_top_margin">5dp</dimen>
     <dimen name="synopsis_font_size">16sp</dimen>

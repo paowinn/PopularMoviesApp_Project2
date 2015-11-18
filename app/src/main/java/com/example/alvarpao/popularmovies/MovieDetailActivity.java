@@ -1,8 +1,11 @@
 package com.example.alvarpao.popularmovies;
 
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +15,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.ParseException;
+import java.util.ArrayList;
 
 /**
  * This class represents the movie details info for a selected movie from the movie grid
@@ -103,16 +119,14 @@ public class MovieDetailActivity extends ActionBarActivity{
 
         }
 
-        private void getExtraMovieInfo(long movieId)
-        {
-            /*
+        private void getExtraMovieInfo(long movieId) {
             FetchExtraMovieInfoTask fetchExtraMovieInfoTask = new FetchExtraMovieInfoTask();
             fetchExtraMovieInfoTask.execute((new Long(movieId)).toString(), PAGE_1);
-            */
+
         }
 
-        /*
-        public class FetchExtraMovieInfoTask extends AsyncTask<String, Void, Void> {
+
+        public class FetchExtraMovieInfoTask extends AsyncTask<String, Void, Boolean> {
 
             private final String LOG_TAG = FetchExtraMovieInfoTask.class.getSimpleName();
             final String MOVIE_ENDPOINT_BASE_URL = "http://api.themoviedb.org/3/movie/";
@@ -122,7 +136,7 @@ public class MovieDetailActivity extends ActionBarActivity{
             final String PAGE_PARAMETER = "page";
 
 
-            private Movie[] getMovieInfoFromJson(String jsonReply) throws JSONException, ParseException{
+            private boolean setExtraMovieInfoFromJson(String jsonReply) throws JSONException, ParseException{
                 // Parse out the required movie info from the JSON reply for the movie in the detail
                 // view.
                 // I used: https://jsonformatter.curiousconcept.com/ to format a given
@@ -141,41 +155,61 @@ public class MovieDetailActivity extends ActionBarActivity{
                 final String REVIEW_AUTHOR = "author";
                 final String REVIEW_CONTENT = "content";
 
-                Movie[] movies;
                 JSONObject movieDataJson = new JSONObject(jsonReply);
 
-                // The results array returns info on all the movies sorted by either popularity or
-                // rating (in ascending or descending order for both options)
-                JSONArray resultsArray = movieDataJson.getJSONArray(RESULTS);
+                // The runtime for the movie is part of the main JSON object returned by the query
+                mMovie.setRuntime(movieDataJson.getInt(RUNTIME));
 
-                // Movie data is returned by pages. Each page contains info on 20 movies (except for
-                // the last page.
-                movies = new Movie[resultsArray.length()];
+                // The trailers for the movie are stored as a JSON object in the main JSON object
+                // returned by the query
+                JSONObject trailersDataJson = movieDataJson.getJSONObject(TRAILERS);
 
-                for (int index = 0; index < resultsArray.length(); index++)
+                // The trailer data in the JSON object has two JSON Arrays, we are only interested
+                // in the youtube array.
+                JSONArray youtubeArray = trailersDataJson.getJSONArray(YOUTUBE);
+
+                mMovie.trailers = new ArrayList<Trailer>(youtubeArray.length());
+
+                // Store all the trailers info in the trailers array list that is part of the
+                // displayed movie object
+                for (int index = 0; index < youtubeArray.length(); index++)
                 {
-                    JSONObject movieInfo = resultsArray.getJSONObject(index);
+                    JSONObject trailerInfo = youtubeArray.getJSONObject(index);
 
-                    // To match the UX mockups, get the release date from the JSON object and
-                    // extract the year from it to save it in the movie object
-                    Date releaseDate = releaseDateFormat.parse(movieInfo.getString(RELEASE_DATE));
-                    calendar.setTime(releaseDate);
-
-                    movies[index] = new Movie(movieInfo.getLong(ID),
-                            buildImageURL(movieInfo.getString(POSTER_PATH)),
-                            movieInfo.getString(ORIGINAL_TITLE),
-                            movieInfo.getString(PLOT_SYNOPSIS),
-                            movieInfo.getDouble(USER_RATING),
-                            Integer.toString(calendar.get(Calendar.YEAR)));
-                    Log.v(LOG_TAG, "Poster Paths[" + Integer.toString(index) + "]: " + movieInfo.getString(POSTER_PATH));
+                    mMovie.trailers.add(index, new Trailer(trailerInfo.getString(TRAILER_NAME),
+                            trailerInfo.getString(TRAILER_SOURCE)));
+                    Log.v(LOG_TAG, "Trailers[" + Integer.toString(index) + "]: " +
+                            trailerInfo.getString(TRAILER_NAME));
                 }
 
-                return movies;
+                // The reviews for the movie are stored as a JSON object in the main JSON object
+                // returned by the query
+                JSONObject reviewsDataJson = movieDataJson.getJSONObject(REVIEWS);
+
+                // The reviews result data is stored in a JSON array in the reviews JSON object
+                JSONArray reviewsResultsArray = reviewsDataJson.getJSONArray(REVIEWS_RESULTS);
+
+                mMovie.reviews = new ArrayList<Review>(reviewsResultsArray.length());
+
+                // Store all the reviews info in the reviews array list that is part of the
+                // displayed movie object
+                for (int index = 0; index < reviewsResultsArray.length(); index++)
+                {
+                    JSONObject reviewInfo = reviewsResultsArray.getJSONObject(index);
+
+                    mMovie.reviews.add(index, new Review(reviewInfo.getString(REVIEW_AUTHOR),
+                            reviewInfo.getString(REVIEW_CONTENT)));
+                    Log.v(LOG_TAG, "Reviews[" + Integer.toString(index) + "]: " +
+                            reviewInfo.getString(REVIEW_AUTHOR));
+                }
+
+
+                return true;
 
             }
 
             @Override
-            protected Void doInBackground(String... params) {
+            protected Boolean doInBackground(String... params) {
 
                 HttpURLConnection urlConnection = null;
                 BufferedReader bufferedReader = null;
@@ -268,7 +302,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                 // Parse JSON response to extract the movie required info
                 try {
 
-                    return getMovieInfoFromJson(movieInfoJsonReply);
+                    return setExtraMovieInfoFromJson(movieInfoJsonReply);
                 }
 
                 catch (JSONException exception) {
@@ -282,12 +316,28 @@ public class MovieDetailActivity extends ActionBarActivity{
                 }
 
                 return null;
-                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+
+                if (result != null) {
+
+                    // Obtain the movie details view with the movie's runtime
+                    ((TextView)(getActivity().findViewById(R.id.runtime)))
+                            .setText((new Integer(mMovie.getRuntime())).toString() +
+                            getString(R.string.runtime_units));
+
+                }
+
+                else if(result == null && !Utility.deviceIsConnected(getActivity()))
+                    Toast.makeText(getActivity(), getString(R.string.no_internet_error),
+                            Toast.LENGTH_SHORT).show();
             }
 
         }
 
-       */
+
 
         /*
         public class SaveFavoriteMovieDetailsTask extends AsyncTask<String, Void, Void> {
