@@ -381,7 +381,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 StringBuffer receiveBuffer;
 
                 // Determine if the device has an internet connection
-                if(((MainActivity)getActivity()).deviceIsConnected())
+                if(Utility.deviceIsConnected(getActivity()))
                 {
                     // Creating the GET request to the Movie Database and then open
                     // a HTTP connection
@@ -488,7 +488,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 }
             }
 
-            else if(movies == null && !((MainActivity)getActivity()).deviceIsConnected())
+            else if(movies == null && !Utility.deviceIsConnected(getActivity()))
                 Toast.makeText(getActivity(), getString(R.string.no_internet_error),
                         Toast.LENGTH_SHORT).show();
 

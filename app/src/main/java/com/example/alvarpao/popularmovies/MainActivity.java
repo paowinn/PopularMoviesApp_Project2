@@ -107,13 +107,8 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
             // using a fragment transaction.
 
             Bundle args = new Bundle();
-            //Bundle up the select movie's details and pass them as arguments for the fragment
-            args.putLong(MovieGridFragment.EXTRA_ID, movie.getId());
-                    args.putString(MovieGridFragment.EXTRA_IMAGE_URL, movie.getImageURL());
-                    args.putString(MovieGridFragment.EXTRA_ORIGINAL_TITLE, movie.getOriginalTitle());
-                    args.putString(MovieGridFragment.EXTRA_PLOT_SYNOPSIS, movie.getPlotSynopsis());
-                    args.putDouble(MovieGridFragment.EXTRA_USER_RATING, movie.getUserRating());
-                    args.putString(MovieGridFragment.EXTRA_RELEASE_YEAR, movie.getReleaseYear());
+            // Pass the movie object as argument for the fragment
+            args.putParcelable(MovieDetailActivity.MovieDetailFragment.MOVIE_DETAILS, movie);
 
             MovieDetailActivity.MovieDetailFragment detailsFragment =
                     new MovieDetailActivity.MovieDetailFragment();
@@ -128,15 +123,9 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
         else
         {
             // When in one-pane layout just start a new MovieDetailActivity and pass the selected
-            // movie's info to display it in a different screen
+            // movie object to display it in a different screen
             Intent intent = new Intent(this, MovieDetailActivity.class);
-            intent.putExtra(MovieGridFragment.EXTRA_ID, movie.getId())
-                    .putExtra(MovieGridFragment.EXTRA_IMAGE_URL, movie.getImageURL())
-                    .putExtra(MovieGridFragment.EXTRA_ORIGINAL_TITLE, movie.getOriginalTitle())
-                    .putExtra(MovieGridFragment.EXTRA_PLOT_SYNOPSIS, movie.getPlotSynopsis())
-                    .putExtra(MovieGridFragment.EXTRA_USER_RATING, movie.getUserRating())
-                    .putExtra(MovieGridFragment.EXTRA_RELEASE_YEAR, movie.getReleaseYear());
-
+            intent.putExtra(MovieDetailActivity.MovieDetailFragment.MOVIE_DETAILS, movie);
             startActivity(intent);
         }
     }
