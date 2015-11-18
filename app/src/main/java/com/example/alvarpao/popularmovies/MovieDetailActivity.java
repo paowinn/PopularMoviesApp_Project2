@@ -40,7 +40,6 @@ public class MovieDetailActivity extends ActionBarActivity{
     public static class MovieDetailFragment extends Fragment {
 
         private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
-        private static final Long MOVIE_ID_DEFAULT = -1L;
         private static final String PAGE_1 = "1";
         static final String MOVIE_DETAILS = "movie_details";
 
