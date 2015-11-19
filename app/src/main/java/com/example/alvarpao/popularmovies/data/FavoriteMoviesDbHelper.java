@@ -37,10 +37,10 @@ public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
                 FavoriteEntry.COLUMN_ORGINAL_TITLE + " TEXT NOT NULL," +
 
                 FavoriteEntry.COLUMN_RELEASE_YEAR + " TEXT NOT NULL, " +
-                FavoriteEntry.PLOT_SYNOPSIS + " TEXT NOT NULL, " +
+                FavoriteEntry.COLUMN_PLOT_SYNOPSIS + " TEXT NOT NULL, " +
 
-                FavoriteEntry.RUNTIME + " INTEGER NOT NULL, " +
-                FavoriteEntry.USER_RATING + " REAL NOT NULL, " +
+                FavoriteEntry.COLUMN_RUNTIME + " INTEGER NOT NULL, " +
+                FavoriteEntry.COLUMN_USER_RATING + " REAL NOT NULL, " +
 
                 // To assure the application have just one favorite entry per movie
                 // a UNIQUE constraint is created
@@ -51,27 +51,29 @@ public class FavoriteMoviesDbHelper extends SQLiteOpenHelper {
 
                 TrailerEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
 
+                TrailerEntry.COLUMN_FAVE_KEY + " INTEGER NOT NULL, " +
                 TrailerEntry.COLUMN_NAME + " TEXT NOT NULL, " +
                 TrailerEntry.COLUMN_SOURCE + " TEXT NOT NULL, " +
 
                 // Set up the favorite movie column id as a foreign key to favorite table.
                 " FOREIGN KEY (" + TrailerEntry.COLUMN_FAVE_KEY + ") REFERENCES " +
-                FavoriteEntry.TABLE_NAME + " (" + FavoriteEntry._ID + ");";
+                FavoriteEntry.TABLE_NAME + " (" + FavoriteEntry._ID + "));";
 
         final String SQL_CREATE_REVIEW_TABLE = "CREATE TABLE " + ReviewEntry.TABLE_NAME + " (" +
 
                 ReviewEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
 
+                ReviewEntry.COLUMN_FAVE_KEY + " INTEGER NOT NULL, " +
                 ReviewEntry.COLUMN_AUTHOR + " TEXT NOT NULL, " +
                 ReviewEntry.COLUMN_CONTENT + " TEXT NOT NULL, " +
 
                 // Set up the favorite movie column id as a foreign key to favorite table.
                 " FOREIGN KEY (" + ReviewEntry.COLUMN_FAVE_KEY + ") REFERENCES " +
-                FavoriteEntry.TABLE_NAME + " (" + FavoriteEntry._ID + ");";
+                FavoriteEntry.TABLE_NAME + " (" + FavoriteEntry._ID + "));";
 
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITE_TABLE);
-        sqLiteDatabase.execSQL(SQL_CREATE_REVIEW_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_TRAILER_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_REVIEW_TABLE);
     }
 
     @Override

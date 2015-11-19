@@ -55,11 +55,11 @@ public class FavoriteMoviesContract {
         public static final String COLUMN_RELEASE_YEAR = "release_year";
 
         // Runtime for the favorited movie stored as integer
-        public static final String RUNTIME = "runtime";
+        public static final String COLUMN_RUNTIME = "runtime";
 
         // User rating stored as float
-        public static final String USER_RATING = "user_rating";
-        public static final String PLOT_SYNOPSIS = "overview";
+        public static final String COLUMN_USER_RATING = "user_rating";
+        public static final String COLUMN_PLOT_SYNOPSIS = "overview";
 
     }
 }
