@@ -42,4 +42,6 @@
     <!-- Displayed error for when the device doesn't have an active internet connection -->
     <string name="no_internet_error">Please make sure that your internet connection is active</string>
 
+    <string name="error_saving_favorite">There was an error trying to save all the movie\'s details to your favorite\'s list</string>
+
 </resources>

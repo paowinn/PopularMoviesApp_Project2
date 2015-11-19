@@ -107,19 +107,23 @@ public class MovieDetailActivity extends ActionBarActivity{
             }
 
             mBtnFavorite = (ImageButton)rootView.findViewById(R.id.imgBtnFavorite);
-            mBtnFavorite.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
 
-                    Toast.makeText(getActivity(), "***FAVORITED***", Toast.LENGTH_SHORT).show();
-                    SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
-                            new SaveFavoriteMovieDetailsTask();
-                    saveFavoriteMovieDetailsTask.execute();
-                }
-            });
-
+            // Query the local database to determine if the movie in the current detail view is
+            // in the user's favorite list
+            checkIfFavorite();
 
             return rootView;
+        }
+
+        private void checkIfFavorite() {
+
+            // Query the local database to determine if the movie in the current detail view is
+            // in the user's favorite list. If so, change the image of the "Mark Favorite" button
+            // to "Favorite" and change the onClick method appropriate to delete the movie from
+            // the database if clicked again.
+            QueryIfFavoriteMovieTask queryIfFavoriteMovieTask =
+                    new QueryIfFavoriteMovieTask();
+            queryIfFavoriteMovieTask.execute();
 
         }
 
@@ -342,6 +346,80 @@ public class MovieDetailActivity extends ActionBarActivity{
         }
 
 
+        public class QueryIfFavoriteMovieTask extends AsyncTask<Void, Void, Boolean> {
+
+            private SQLiteDatabase mDatabase;
+
+            private Boolean queryIfFavorite() {
+
+                // Query the database to find out if the current movie is in the favorite list
+                // so the "Mark Favorite" button can change its image and its onClick method
+                // appropriately
+                Cursor favoriteCursor = mDatabase.query(
+                        FavoriteMoviesContract.FavoriteEntry.TABLE_NAME,  // Table to Query
+                        null, // leaving "columns" null just returns all the columns.
+                        FavoriteMoviesContract.FavoriteEntry.COLUMN_THEMOVIEDB_ID + " = ?", // cols for "where" clause
+                        new String[]{(new Long(mMovie.getId())).toString()}, // values for "where" clause
+                        null, // columns to group by
+                        null, // columns to filter by row groups
+                        null  // sort order
+                );
+
+                if(favoriteCursor.moveToFirst()) {
+                    favoriteCursor.close();
+                    return true;
+                }
+
+                favoriteCursor.close();
+                return null;
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+
+                // Get reference to writable favorite movies database
+                FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(getActivity());
+                mDatabase = dbHelper.getWritableDatabase();
+
+                if (queryIfFavorite() == null) {
+                    dbHelper.close();
+                    return null;
+                }
+
+                dbHelper.close();
+                return true;
+            }
+
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+
+                // Determine if the movie is in the favorite user's list
+                if (result != null) {
+
+                    mBtnFavorite.setImageResource(R.drawable.favorite);
+
+                    // Change the onClick listener method to drop the movie if clicked again and
+                    // to update the image on the button appropriately
+                    mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
+                            mBtnFavorite.setImageResource(R.drawable.star);
+                            mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                    SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
+                                            new SaveFavoriteMovieDetailsTask();
+                                    saveFavoriteMovieDetailsTask.execute();
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        }
 
         public class SaveFavoriteMovieDetailsTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -349,6 +427,7 @@ public class MovieDetailActivity extends ActionBarActivity{
 
             private ContentValues createFavoriteValues()
             {
+                // Create content values with the info of the movie currently displayed
                 ContentValues favoriteValues = new ContentValues();
                 favoriteValues.put(FavoriteMoviesContract.FavoriteEntry.COLUMN_THEMOVIEDB_ID,
                         mMovie.getId());
@@ -370,6 +449,7 @@ public class MovieDetailActivity extends ActionBarActivity{
 
             private ContentValues[] createTrailersValues(long favoriteRowId){
 
+                // Create content values for the trailers of the movie currently displayed
                 ContentValues[] trailersContentValues = new ContentValues[mMovie.trailers.size()];
 
                 for(int index = 0; index < mMovie.trailers.size(); index ++){
@@ -388,6 +468,7 @@ public class MovieDetailActivity extends ActionBarActivity{
 
             private ContentValues[] createReviewsValues(long favoriteRowId){
 
+                // Create content values for the reviews of the movie currently displayed
                 ContentValues[] reviewsContentValues = new ContentValues[mMovie.reviews.size()];
 
                 for(int index = 0; index < mMovie.reviews.size(); index ++){
@@ -406,6 +487,7 @@ public class MovieDetailActivity extends ActionBarActivity{
 
             private int bulkInsert(ContentValues[] values, String tableName){
 
+                // Method that will insert in a give table more than one record
                 int count = 0;
 
                 mDatabase.beginTransaction();
@@ -425,13 +507,8 @@ public class MovieDetailActivity extends ActionBarActivity{
                 return count;
             }
 
-            @Override
-            protected Boolean doInBackground(Void... params) {
-
-                // Get reference to writable favorite movies database
-                FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(getActivity());
-                mDatabase = dbHelper.getWritableDatabase();
-
+            private Boolean saveFavoriteMovie()
+            {
                 // Set up movie values to be inserted in favorite movie table
                 ContentValues favoriteValues = createFavoriteValues();
 
@@ -527,7 +604,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                             favoriteCursor.getString(5) + " " +
                             favoriteCursor.getInt(6) + " " +
                             favoriteCursor.getFloat(7));
-                            favoriteCursor.moveToNext();
+                    favoriteCursor.moveToNext();
                 }
 
                 favoriteCursor.close();
@@ -560,8 +637,23 @@ public class MovieDetailActivity extends ActionBarActivity{
 
                 ///////////
 
-                dbHelper.close();
+                return true;
 
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+
+                // Get reference to writable favorite movies database
+                FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(getActivity());
+                mDatabase = dbHelper.getWritableDatabase();
+
+                if (saveFavoriteMovie() == null) {
+                    dbHelper.close();
+                    return null;
+                }
+
+                dbHelper.close();
                 return true;
             }
 
@@ -571,18 +663,34 @@ public class MovieDetailActivity extends ActionBarActivity{
 
                 if (result != null) {
 
-                    // Obtain the movie details view with the movie's runtime
-                    ((TextView)(getActivity().findViewById(R.id.runtime)))
-                            .setText((new Integer(mMovie.getRuntime())).toString() +
-                                    getString(R.string.runtime_units));
+                    // Change the look of the "Mark Favorite" button to let know the user that this
+                    // movie is already in the favorite list
+                    mBtnFavorite.setImageResource(R.drawable.favorite);
 
-                    mBtnFavorite.setImageResource(R.drawable.star_favorite);
+                    // Change the onClick method to drop the movie from the favorite list if
+                    // clicked again
+                    mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
+                            mBtnFavorite.setImageResource(R.drawable.star);
+                            mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                    SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
+                                            new SaveFavoriteMovieDetailsTask();
+                                    saveFavoriteMovieDetailsTask.execute();
+                                }
+                            });
+                        }
+                    });
 
                 }
 
                 else if(result == null)
                 {
-                    Toast.makeText(getActivity(), "There was an error trying to load the all the movie's details to your favorite's list",
+                    Toast.makeText(getActivity(), getString(R.string.error_saving_favorite),
                             Toast.LENGTH_SHORT).show();
                 }
             }
