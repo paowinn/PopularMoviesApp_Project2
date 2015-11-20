@@ -108,13 +108,11 @@ public class MovieDetailActivity extends ActionBarActivity{
 
             mBtnFavorite = (ImageButton)rootView.findViewById(R.id.imgBtnFavorite);
             mBtnFavorite.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                                SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
-                                        new SaveFavoriteMovieDetailsTask();
-                                saveFavoriteMovieDetailsTask.execute();
-                        }});
+                @Override
+                public void onClick(View v) {
+                    saveFavoriteMovieDetails();
+                }
+            });
 
 
             // Query the local database to determine if the movie in the current detail view is
@@ -136,10 +134,20 @@ public class MovieDetailActivity extends ActionBarActivity{
 
         }
 
+        private void saveFavoriteMovieDetails() {
+
+            // Save the current movie's details into the local database to keep the user's favorite
+            // list
+            SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
+                    new SaveFavoriteMovieDetailsTask();
+            saveFavoriteMovieDetailsTask.execute();
+        }
+
         private void getExtraMovieInfo(long movieId) {
+            // Fetch the runtime, trailers and reviews for the movie currently in the detail
+            // view
             FetchExtraMovieInfoTask fetchExtraMovieInfoTask = new FetchExtraMovieInfoTask();
             fetchExtraMovieInfoTask.execute((new Long(movieId)).toString(), PAGE_1);
-
         }
 
 
@@ -418,10 +426,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                             mBtnFavorite.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-
-                                    SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
-                                            new SaveFavoriteMovieDetailsTask();
-                                    saveFavoriteMovieDetailsTask.execute();
+                                    saveFavoriteMovieDetails();
                                 }
                             });
                         }
@@ -516,7 +521,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                 return count;
             }
 
-            private Boolean saveFavoriteMovie()
+            private Boolean saveMovie()
             {
                 // Set up movie values to be inserted in favorite movie table
                 ContentValues favoriteValues = createFavoriteValues();
@@ -657,7 +662,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                 FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(getActivity());
                 mDatabase = dbHelper.getWritableDatabase();
 
-                if (saveFavoriteMovie() == null) {
+                if (saveMovie() == null) {
                     dbHelper.close();
                     return null;
                 }
@@ -686,10 +691,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                             mBtnFavorite.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-
-                                    SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
-                                            new SaveFavoriteMovieDetailsTask();
-                                    saveFavoriteMovieDetailsTask.execute();
+                                    saveFavoriteMovieDetails();
                                 }
                             });
                         }
