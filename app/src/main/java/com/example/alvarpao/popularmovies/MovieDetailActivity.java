@@ -107,6 +107,15 @@ public class MovieDetailActivity extends ActionBarActivity{
             }
 
             mBtnFavorite = (ImageButton)rootView.findViewById(R.id.imgBtnFavorite);
+            mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                                SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
+                                        new SaveFavoriteMovieDetailsTask();
+                                saveFavoriteMovieDetailsTask.execute();
+                        }});
+
 
             // Query the local database to determine if the movie in the current detail view is
             // in the user's favorite list
@@ -396,7 +405,7 @@ public class MovieDetailActivity extends ActionBarActivity{
 
                 // Determine if the movie is in the favorite user's list
                 if (result != null) {
-
+                    // Movie is in user's favorite list
                     mBtnFavorite.setImageResource(R.drawable.favorite);
 
                     // Change the onClick listener method to drop the movie if clicked again and
