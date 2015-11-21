@@ -134,6 +134,13 @@ public class MovieDetailActivity extends ActionBarActivity{
 
         }
 
+        private void deleteMovieFromFavorites(){
+
+            Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
+            DeleteFavoriteMovieTask deleteFavoriteMovieTask = new DeleteFavoriteMovieTask();
+            deleteFavoriteMovieTask.execute();
+        }
+
         private void saveFavoriteMovieDetails() {
 
             // Save the current movie's details into the local database to keep the user's favorite
@@ -351,7 +358,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                     // Obtain the movie details view with the movie's runtime
                     ((TextView)(getActivity().findViewById(R.id.runtime)))
                             .setText((new Integer(mMovie.getRuntime())).toString() +
-                            getString(R.string.runtime_units));
+                                    getString(R.string.runtime_units));
 
                 }
 
@@ -421,7 +428,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                     mBtnFavorite.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
+                            deleteMovieFromFavorites();
                             mBtnFavorite.setImageResource(R.drawable.star);
                             mBtnFavorite.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -431,6 +438,93 @@ public class MovieDetailActivity extends ActionBarActivity{
                             });
                         }
                     });
+                }
+            }
+        }
+
+        public class DeleteFavoriteMovieTask extends AsyncTask<Void, Void, Boolean> {
+
+            private SQLiteDatabase mDatabase;
+
+            private Boolean deleteFavoriteMovie() {
+
+                int movieIdToDelete;
+
+                // Query the favorite table to get the id of the movie to be deleted. This id
+                // is going to be used to delete the trailer and review entries related to
+                // the movie.
+                Cursor favoriteCursor = mDatabase.query(
+                        FavoriteMoviesContract.FavoriteEntry.TABLE_NAME,  // Table to Query
+                        new String[]{ FavoriteMoviesContract.FavoriteEntry._ID }, // Column to query.
+                        FavoriteMoviesContract.FavoriteEntry.COLUMN_THEMOVIEDB_ID + " = ?", // cols for "where" clause
+                        new String[]{(new Long(mMovie.getId())).toString()}, // values for "where" clause
+                        null, // columns to group by
+                        null, // columns to filter by row groups
+                        null  // sort order
+                );
+
+                if(favoriteCursor.moveToFirst()) {
+                    movieIdToDelete = favoriteCursor.getInt(0);
+                    favoriteCursor.close();
+                }
+
+                else {
+                    favoriteCursor.close();
+                    return null;
+                }
+
+                // Delete from the database the given favorite movie
+                int favoriteRowsDeleted = mDatabase.delete(
+                        FavoriteMoviesContract.FavoriteEntry.TABLE_NAME,  // Table to Query
+                        FavoriteMoviesContract.FavoriteEntry.COLUMN_THEMOVIEDB_ID + " = ?", // cols for "where" clause
+                        new String[]{(Long.toString(mMovie.getId()))} // values for "where" clause
+                );
+
+                if(favoriteRowsDeleted == 0)
+                    return null;
+
+                // Delete from the database all the trailers for the given movie
+                mDatabase.delete(
+                        FavoriteMoviesContract.TrailerEntry.TABLE_NAME,  // Table to Query
+                        FavoriteMoviesContract.TrailerEntry.COLUMN_FAVE_KEY + " = ?", // cols for "where" clause
+                        new String[]{(Integer.toString(movieIdToDelete))} // values for "where" clause
+                );
+
+                // Delete from the database all the reviews for the given movie
+                mDatabase.delete(
+                        FavoriteMoviesContract.ReviewEntry.TABLE_NAME,  // Table to Query
+                        FavoriteMoviesContract.ReviewEntry.COLUMN_FAVE_KEY + " = ?", // cols for "where" clause
+                        new String[]{(Integer.toString(movieIdToDelete))} // values for "where" clause
+                );
+
+                return true;
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+
+                // Get reference to writable favorite movies database
+                FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(getActivity());
+                mDatabase = dbHelper.getWritableDatabase();
+
+                if (deleteFavoriteMovie() == null) {
+                    dbHelper.close();
+                    return null;
+                }
+
+                dbHelper.close();
+                return true;
+            }
+
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+
+                // Determine if movie and its associated trailers and reviews were deleted
+                // successfully
+                if (result == null) {
+                    Toast.makeText(getActivity(), getString(R.string.error_deleting_favorite),
+                    Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -686,7 +780,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                     mBtnFavorite.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
+                            deleteMovieFromFavorites();
                             mBtnFavorite.setImageResource(R.drawable.star);
                             mBtnFavorite.setOnClickListener(new View.OnClickListener() {
                                 @Override
