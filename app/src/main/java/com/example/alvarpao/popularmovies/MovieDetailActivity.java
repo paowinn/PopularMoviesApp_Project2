@@ -29,8 +29,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -71,6 +73,10 @@ public class MovieDetailActivity extends ActionBarActivity{
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
+            // Decimal format for user rating
+            DecimalFormat decimalFormat = new DecimalFormat("##.#");
+            decimalFormat.setRoundingMode(RoundingMode.HALF_UP);
+
             View rootView = inflater.inflate(R.layout.movie_detail_fragment, container, false);
 
             // Get the fragmnent's arguments in case the fragment has been created when in
@@ -98,7 +104,7 @@ public class MovieDetailActivity extends ActionBarActivity{
                 ((TextView)rootView.findViewById(R.id.originalTitle)).setText(mMovie.getOriginalTitle());
                 ((TextView)rootView.findViewById(R.id.plotSynopsis)).setText(mMovie.getPlotSynopsis());
                 ((TextView)rootView.findViewById(R.id.userRating)).setText(
-                        Double.valueOf(mMovie.getUserRating()).toString() +
+                        Double.valueOf(decimalFormat.format(mMovie.getUserRating())).toString() +
                                 getString(R.string.user_rating_of_ten));
                 ((TextView)rootView.findViewById(R.id.releaseYear)).setText(mMovie.getReleaseYear());
 

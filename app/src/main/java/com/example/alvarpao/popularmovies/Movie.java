@@ -23,8 +23,8 @@ public class Movie implements Parcelable {
     ArrayList<Review> reviews;
 
     public Movie(long id, String imageURL, String originalTitle, String plotSynopsis, double userRating,
-                 String releaseYear)
-    {
+                 String releaseYear) {
+
         this.id = id;
         this.imageURL = imageURL;
         this.originalTitle = originalTitle;
@@ -93,6 +93,5 @@ public class Movie implements Parcelable {
     public void setRuntime(int runtime){ this.runtime = runtime; }
 
     public int getRuntime(){ return runtime; }
-
 
 }
