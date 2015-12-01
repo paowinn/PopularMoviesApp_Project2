@@ -14,10 +14,12 @@
     <!-- Labels for sort options that appear in action bar spinner -->
     <string name="sort_title_most_popular">Most popular</string>
     <string name="sort_title_highest_rated">Highest-rated</string>
+    <string name="sort_title_favorites">Favorites</string>
 
     <!-- Values for the sort options associated with their label selected-->
     <string name="sort_most_popular_value" translatable="false">popularity.desc</string>
     <string name="sort_highest_rated_value" translatable="false">vote_average.desc</string>
+    <string name="sort_favorites_value" translatable="false">favorites</string>
     <string name="sort_preference_default" translatable="false">popularity.desc</string>
 
     <!-- Key name to get sort preference from Shared Preferences -->

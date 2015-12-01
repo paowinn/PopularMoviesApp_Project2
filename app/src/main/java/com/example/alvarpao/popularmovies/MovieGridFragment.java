@@ -3,6 +3,8 @@ package com.example.alvarpao.popularmovies;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,6 +23,9 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.example.alvarpao.popularmovies.data.FavoriteMoviesContract;
+import com.example.alvarpao.popularmovies.data.FavoriteMoviesDbHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -347,6 +352,43 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
         }
 
+        private Movie[] getFavoriteMovies(){
+
+            // Query the local database for all the user's favorite movies
+            // Get reference to writable favorite movies database
+
+            Movie[] movies = {};
+            int index = 0;
+            FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(getActivity());
+            SQLiteDatabase database = dbHelper.getWritableDatabase();
+            Cursor favoriteCursor = database.query(
+                    FavoriteMoviesContract.FavoriteEntry.TABLE_NAME,  // Table to Query
+                    null, // leaving "columns" null just returns all the columns.
+                    null, // cols for "where" clause
+                    null, // values for "where" clause
+                    null, // columns to group by
+                    null, // columns to filter by row groups
+                    FavoriteMoviesContract.FavoriteEntry.COLUMN_THEMOVIEDB_ID  // sort order
+            );
+
+            if(favoriteCursor.moveToFirst()) {
+                movies = new Movie[favoriteCursor.getCount()];
+                while (favoriteCursor.isAfterLast() == false) {
+                    movies[index] = new Movie(favoriteCursor.getInt(1),
+                            favoriteCursor.getString(2),
+                            favoriteCursor.getString(3),
+                            favoriteCursor.getString(5),
+                            favoriteCursor.getFloat(7),
+                            favoriteCursor.getString(4));
+                    index++;
+                    favoriteCursor.moveToNext();
+                }
+                favoriteCursor.close();
+            }
+
+            return movies;
+        }
+
         @Override
         protected Movie[] doInBackground(String... params) {
 
@@ -359,106 +401,104 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 return null;
             }
 
-            try {
-                // Construction of the URL query for the Movie Database
-                // More info about the API: http://docs.themoviedb.apiary.io/#
+            if(!params[0].equals(getString(R.string.sort_favorites_value))) {
+                try {
+                    // Construction of the URL query for the Movie Database
+                    // More info about the API: http://docs.themoviedb.apiary.io/#
 
-                Uri.Builder uriQuery = Uri.parse(DISCOVER_MOVIE_ENDPOINT_BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY_PARAMETER, ApiKey.API_KEY)
-                        .appendQueryParameter(SORT_PARAMETER, params[0])
-                        .appendQueryParameter(PAGE_PARAMETER, params[1]);
+                    Uri.Builder uriQuery = Uri.parse(DISCOVER_MOVIE_ENDPOINT_BASE_URL).buildUpon()
+                            .appendQueryParameter(API_KEY_PARAMETER, ApiKey.API_KEY)
+                            .appendQueryParameter(SORT_PARAMETER, params[0])
+                            .appendQueryParameter(PAGE_PARAMETER, params[1]);
 
-                // Adding this parameter eliminates getting highly-rated movies with very few votes.
-                // The minimum amount of votes I chose is based on a similar criteria used by rotten
-                // tomatoes (Certified Fresh)
-                if(params[0].equals(getString(R.string.sort_highest_rated_value)))
-                    uriQuery.appendQueryParameter(VOTE_COUNT_PARAMETER, VOTE_COUNT_VALUE);
+                    // Adding this parameter eliminates getting highly-rated movies with very few votes.
+                    // The minimum amount of votes I chose is based on a similar criteria used by rotten
+                    // tomatoes (Certified Fresh)
+                    if (params[0].equals(getString(R.string.sort_highest_rated_value)))
+                        uriQuery.appendQueryParameter(VOTE_COUNT_PARAMETER, VOTE_COUNT_VALUE);
 
-                Uri query = uriQuery.build();
-                URL queryUrl = new URL(query.toString());
+                    Uri query = uriQuery.build();
+                    URL queryUrl = new URL(query.toString());
 
-                InputStream inputStream;
-                StringBuffer receiveBuffer;
+                    InputStream inputStream;
+                    StringBuffer receiveBuffer;
 
-                // Determine if the device has an internet connection
-                if(Utility.deviceIsConnected(getActivity()))
-                {
-                    // Creating the GET request to the Movie Database and then open
-                    // a HTTP connection
-                    urlConnection = (HttpURLConnection) queryUrl.openConnection();
-                    urlConnection.setRequestMethod("GET");
-                    urlConnection.connect();
+                    // Determine if the device has an internet connection
+                    if (Utility.deviceIsConnected(getActivity())) {
+                        // Creating the GET request to the Movie Database and then open
+                        // a HTTP connection
+                        urlConnection = (HttpURLConnection) queryUrl.openConnection();
+                        urlConnection.setRequestMethod("GET");
+                        urlConnection.connect();
 
-                    inputStream = urlConnection.getInputStream();
-                    receiveBuffer = new StringBuffer();
+                        inputStream = urlConnection.getInputStream();
+                        receiveBuffer = new StringBuffer();
 
 
-                    if (inputStream == null) {
+                        if (inputStream == null) {
+                            return null;
+                        }
+                    }
+
+                    // Device doesn't have an internet connection
+                    else
+                        return null;
+
+                    // Preparing to read JSON response line by line
+                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        // Adding a new line to every line of JSON response read for
+                        // debugging purposes
+                        receiveBuffer.append(line + "\n");
+                    }
+
+                    if (receiveBuffer.length() == 0) {
+                        // If not response received then do nothing
                         return null;
                     }
-                }
 
-                // Device doesn't have an internet connection
-                else
-                  return null;
+                    // Completing reading JSON response
+                    movieInfoJsonReply = receiveBuffer.toString();
+                    Log.v(LOG_TAG, "JSON Movie Reply: " + movieInfoJsonReply);
+                } catch (IOException exception) {
 
-                // Preparing to read JSON response line by line
-                bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    // Adding a new line to every line of JSON response read for
-                    // debugging purposes
-                    receiveBuffer.append(line + "\n");
-                }
-
-                if (receiveBuffer.length() == 0) {
-                    // If not response received then do nothing
+                    Log.e(LOG_TAG, getString(R.string.io_error_message), exception);
                     return null;
                 }
 
-                // Completing reading JSON response
-                movieInfoJsonReply = receiveBuffer.toString();
-                Log.v(LOG_TAG, "JSON Movie Reply: " + movieInfoJsonReply);
-            }
+                //Close HTTP connection and buffered reader even if there is an exception
+                finally {
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
+                    }
 
-            catch (IOException exception) {
+                    if (bufferedReader != null) {
 
-                Log.e(LOG_TAG, getString(R.string.io_error_message), exception);
-                return null;
-            }
-
-            //Close HTTP connection and buffered reader even if there is an exception
-            finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-
-                if (bufferedReader != null) {
-
-                    try {
-                        bufferedReader.close();
-                    } catch (IOException exception) {
-                        Log.e(LOG_TAG, getString(R.string.error_closing_reader), exception);
+                        try {
+                            bufferedReader.close();
+                        } catch (IOException exception) {
+                            Log.e(LOG_TAG, getString(R.string.error_closing_reader), exception);
+                        }
                     }
                 }
+
+                // Parse JSON response to extract the movie required movie infor
+                try {
+
+                    return getMovieInfoFromJson(movieInfoJsonReply);
+                } catch (JSONException exception) {
+                    Log.e(LOG_TAG, exception.getMessage(), exception);
+                    exception.printStackTrace();
+                } catch (ParseException exception) {
+                    Log.e(LOG_TAG, exception.getMessage(), exception);
+                    exception.printStackTrace();
+                }
             }
 
-            // Parse JSON response to extract the movie required movie infor
-            try {
-
-                return getMovieInfoFromJson(movieInfoJsonReply);
-            }
-
-            catch (JSONException exception) {
-                Log.e(LOG_TAG, exception.getMessage(), exception);
-                exception.printStackTrace();
-            }
-
-            catch(ParseException exception) {
-                Log.e(LOG_TAG, exception.getMessage(), exception);
-                exception.printStackTrace();
-            }
+            else
+              return getFavoriteMovies();
 
             return null;
         }
