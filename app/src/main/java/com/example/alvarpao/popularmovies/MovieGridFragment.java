@@ -132,8 +132,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         int paramSortPosition = preferences.getInt(
-                getString(R.string.sort_position_preference_key),
-                0);
+                getString(R.string.sort_position_preference_key), 0);
         mSortSpinner.setSelection(paramSortPosition);
 
     }
@@ -189,43 +188,45 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     }
 
     @Override
-    public void onScroll (AbsListView view, int firstVisibleItem, int visibleItemCount,
-                          int totalItemCount)
-    {
+    public void onScroll (AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        // Get the current selected sort option. If it is "Favorites" don't fetch another page
+        // when scrolling since we have the whole list of movies in the local database and we don't
+        // need to make requests to the API
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
+                getString(R.string.sort_preference_default));
 
-        // Since the onScroll method can get called several times at one time when the user is
-        // scrolling, need to verify if the images are still loading before fetching another page
-        // of results (loading it is first initialized as true)
-        if (mLoadingMovies)
-        {
-            if (totalItemCount > mPreviousTotalItems)
-            {
-                // Loading data to the grid view has been concluded
-                mLoadingMovies = false;
-                mPreviousTotalItems = totalItemCount;
+        if(!paramSortValue.equals(getString(R.string.sort_favorites_value))) {
+            // Since the onScroll method can get called several times at one time when the user is
+            // scrolling, need to verify if the images are still loading before fetching another page
+            // of results (loading it is first initialized as true)
+            if (mLoadingMovies) {
+                if (totalItemCount > mPreviousTotalItems) {
+                    // Loading data to the grid view has been concluded
+                    mLoadingMovies = false;
+                    mPreviousTotalItems = totalItemCount;
 
-                // Check if device is in two-pane mode. If that is the case and the first page
-                // being fetched is page 1 (as a result of a change in the sort option or when
-                // the app is first loaded) show an instance of the detail fragment with the
-                // info of the first movie in the returned list of movies
-                if( (mPageToFetch == 1) && ((MainActivity)getActivity()).getLayoutMode())
-                {
-                    Movie firstMovie = mMovieAdapter.getItem(0);
+                    // Check if device is in two-pane mode. If that is the case and the first page
+                    // being fetched is page 1 (as a result of a change in the sort option or when
+                    // the app is first loaded) show an instance of the detail fragment with the
+                    // info of the first movie in the returned list of movies
+                    if ((mPageToFetch == 1) && ((MainActivity) getActivity()).getLayoutMode()) {
+                        Movie firstMovie = mMovieAdapter.getItem(0);
+                        ((Callback) getActivity()).onItemSelected(firstMovie);
+                    }
 
-                    ((Callback) getActivity()).onItemSelected(firstMovie);
+                    mPageToFetch++;
                 }
-
-                mPageToFetch++;
             }
-        }
 
-        // In order for the next page to be fetched, the previous page has to be loaded and
-        // the user has scrolled enough far down that there will be no more items to display in
-        // the next scroll
-        if (!mLoadingMovies && (totalItemCount == (firstVisibleItem + visibleItemCount))) {
+            // In order for the next page to be fetched, the previous page has to be loaded and
+            // the user has scrolled enough far down that there will be no more items to display in
+            // the next scroll
+            if (!mLoadingMovies && (totalItemCount == (firstVisibleItem + visibleItemCount))) {
 
-            getMovies(Integer.toString(mPageToFetch));
-            mLoadingMovies = true;
+                getMovies(Integer.toString(mPageToFetch));
+                mLoadingMovies = true;
+            }
         }
     }
 
