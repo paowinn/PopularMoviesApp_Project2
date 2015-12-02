@@ -121,7 +121,7 @@ public class FetchExtraMovieInfoTask extends AsyncTask<Movie, Void, Boolean> {
         BufferedReader bufferedReader = null;
         String movieInfoJsonReply = null;
 
-        // If there is no movie id no point on fetching anything
+        // If there is no movie passed no point on fetching anything
         if (params.length == 0) {
             return null;
         }
