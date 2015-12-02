@@ -1,10 +1,7 @@
 package com.example.alvarpao.popularmovies;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -39,7 +36,7 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.movie_details_container,
-                                new MovieDetailActivity.MovieDetailFragment(), MOVIE_DETAILS_FRAGMENT_TAG)
+                                new MovieDetailFragment(), MOVIE_DETAILS_FRAGMENT_TAG)
                         .commit();
             }
         }
@@ -80,16 +77,6 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
                 getString(R.string.sort_preference_default));
     }
 
-    public boolean deviceIsConnected()
-    {
-        //Determine if there is an active internet connection
-        ConnectivityManager connectivityManager = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-        return((activeNetwork != null) && activeNetwork.isConnectedOrConnecting());
-    }
-
     public boolean getLayoutMode()
     {
         return mTwoPaneLayout;
@@ -108,10 +95,9 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
 
             Bundle args = new Bundle();
             // Pass the movie object as argument for the fragment
-            args.putParcelable(MovieDetailActivity.MovieDetailFragment.MOVIE_DETAILS, movie);
+            args.putParcelable(MovieDetailFragment.MOVIE_DETAILS, movie);
 
-            MovieDetailActivity.MovieDetailFragment detailsFragment =
-                    new MovieDetailActivity.MovieDetailFragment();
+            MovieDetailFragment detailsFragment = new MovieDetailFragment();
             detailsFragment.setArguments(args);
 
             getSupportFragmentManager().beginTransaction()
@@ -125,7 +111,7 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
             // When in one-pane layout just start a new MovieDetailActivity and pass the selected
             // movie object to display it in a different screen
             Intent intent = new Intent(this, MovieDetailActivity.class);
-            intent.putExtra(MovieDetailActivity.MovieDetailFragment.MOVIE_DETAILS, movie);
+            intent.putExtra(MovieDetailFragment.MOVIE_DETAILS, movie);
             startActivity(intent);
         }
     }
