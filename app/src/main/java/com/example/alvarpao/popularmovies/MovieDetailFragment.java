@@ -69,15 +69,13 @@ public class MovieDetailFragment extends Fragment {
                             getString(R.string.user_rating_of_ten));
             ((TextView)rootView.findViewById(R.id.releaseYear)).setText(mMovie.getReleaseYear());
 
-            getExtraMovieInfo();
-
         }
 
         mBtnFavorite = (ImageButton)rootView.findViewById(R.id.imgBtnFavorite);
         mBtnFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MovieDetailActivity)getActivity()).saveFavoriteMovieDetails(mBtnFavorite, mMovie);
+                ((MovieDetailActivity)getActivity()).saveFavoriteMovieDetails(mMovie);
             }
         });
 
@@ -89,6 +87,13 @@ public class MovieDetailFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        getExtraMovieInfo();
+    }
+
     private void checkIfFavorite() {
 
         // Query the local database to determine if the movie in the current detail view is
@@ -96,7 +101,7 @@ public class MovieDetailFragment extends Fragment {
         // to "Favorite" and change the onClick method appropriate to delete the movie from
         // the database if clicked again.
         QueryIfFavoriteMovieTask queryIfFavoriteMovieTask =
-                new QueryIfFavoriteMovieTask(getActivity(), mBtnFavorite);
+                new QueryIfFavoriteMovieTask(getActivity());
         queryIfFavoriteMovieTask.execute(mMovie);
 
     }

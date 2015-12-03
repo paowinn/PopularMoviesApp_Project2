@@ -4,6 +4,7 @@ package com.example.alvarpao.popularmovies;
  * Created by alvarpao on 12/2/2015.
  */
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -23,12 +24,10 @@ public class SaveFavoriteMovieDetailsTask extends AsyncTask<Movie, Void, Boolean
     private SQLiteDatabase mDatabase;
     private Movie mMovie;
     private final Context mContext;
-    private ImageButton mBtnFavorite;
     private static final String LOG_TAG = SaveFavoriteMovieDetailsTask.class.getSimpleName();
 
-    public SaveFavoriteMovieDetailsTask(Context context, ImageButton btnFavorite) {
+    public SaveFavoriteMovieDetailsTask(Context context) {
         mContext = context;
-        mBtnFavorite = btnFavorite;
     }
 
     private ContentValues createFavoriteValues()
@@ -276,22 +275,24 @@ public class SaveFavoriteMovieDetailsTask extends AsyncTask<Movie, Void, Boolean
 
         if (result != null) {
 
+            final ImageButton btnFavorite =
+                    (ImageButton)((Activity)mContext).findViewById(R.id.imgBtnFavorite);
             // Change the look of the "Mark Favorite" button to let know the user that this
             // movie is already in the favorite list
-            mBtnFavorite.setImageResource(R.drawable.favorite);
+            btnFavorite.setImageResource(R.drawable.favorite);
 
             // Change the onClick method to drop the movie from the favorite list if
             // clicked again
-            mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+            btnFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
                     ((MovieDetailActivity)mContext).deleteMovieFromFavorites(mMovie);
-                    mBtnFavorite.setImageResource(R.drawable.star);
-                    mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+                    btnFavorite.setImageResource(R.drawable.star);
+                    btnFavorite.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ((MovieDetailActivity)mContext).saveFavoriteMovieDetails(mBtnFavorite, mMovie);
+                            ((MovieDetailActivity)mContext).saveFavoriteMovieDetails(mMovie);
                         }
                     });
                 }

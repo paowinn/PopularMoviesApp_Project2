@@ -2,7 +2,6 @@ package com.example.alvarpao.popularmovies;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.widget.ImageButton;
 
 /**
  * This class represents the movie details info for a selected movie from the movie grid
@@ -29,12 +28,12 @@ public class MovieDetailActivity extends ActionBarActivity{
         deleteFavoriteMovieTask.execute(movie);
     }
 
-    public void saveFavoriteMovieDetails(ImageButton btnFavorite, Movie movie) {
+    public void saveFavoriteMovieDetails(Movie movie) {
 
         // Save the current movie's details into the local database to keep the user's favorite
         // list
         SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
-                new SaveFavoriteMovieDetailsTask(this, btnFavorite);
+                new SaveFavoriteMovieDetailsTask(this);
         saveFavoriteMovieDetailsTask.execute(movie);
     }
 }

@@ -4,6 +4,7 @@ package com.example.alvarpao.popularmovies;
  * Created by alvarpao on 12/2/2015.
  */
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -20,12 +21,10 @@ public class QueryIfFavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
     private SQLiteDatabase mDatabase;
     private Movie mMovie;
     private final Context mContext;
-    private ImageButton mBtnFavorite;
     private static final String LOG_TAG = QueryIfFavoriteMovieTask.class.getSimpleName();
 
-    public QueryIfFavoriteMovieTask(Context context, ImageButton btnFavorite) {
+    public QueryIfFavoriteMovieTask(Context context) {
         mContext = context;
-        mBtnFavorite = btnFavorite;
     }
 
     private Boolean queryIfFavorite() {
@@ -80,23 +79,25 @@ public class QueryIfFavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
     @Override
     protected void onPostExecute(Boolean result) {
 
+        final ImageButton btnFavorite =
+                (ImageButton)((Activity)mContext).findViewById(R.id.imgBtnFavorite);
         // Determine if the movie is in the favorite user's list
         if (result != null) {
             // Movie is in user's favorite list
-            mBtnFavorite.setImageResource(R.drawable.favorite);
+            btnFavorite.setImageResource(R.drawable.favorite);
 
             // Change the onClick listener method to drop the movie if clicked again and
             // to update the image on the button appropriately
-            mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+            btnFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
                     ((MovieDetailActivity)mContext).deleteMovieFromFavorites(mMovie);
-                    mBtnFavorite.setImageResource(R.drawable.star);
-                    mBtnFavorite.setOnClickListener(new View.OnClickListener() {
+                    btnFavorite.setImageResource(R.drawable.star);
+                    btnFavorite.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ((MovieDetailActivity)mContext).saveFavoriteMovieDetails(mBtnFavorite, mMovie);
+                            ((MovieDetailActivity)mContext).saveFavoriteMovieDetails(mMovie);
                         }
                     });
                 }
