@@ -9,8 +9,11 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -235,6 +238,22 @@ public class FetchExtraMovieInfoTask extends AsyncTask<Movie, Void, Boolean> {
             ((TextView)(((Activity)mContext).findViewById(R.id.runtime)))
                     .setText((new Integer(mMovie.getRuntime())).toString() +
                             mContext.getString(R.string.runtime_units));
+
+            if(mMovie.trailers.size() != 0) {
+                // Obtain the first trailer
+               ImageView trailerThumbnail = ((ImageView)(((Activity)mContext).findViewById(R.id.thumbnail)));
+                //Using Picasso open source library to facilitate loading images and caching
+                Picasso.with(mContext)
+                        .load("http://i1.ytimg.com/vi/" + mMovie.trailers.get(0).getSource() + "/default.jpg")
+                        .placeholder(R.drawable.image_loading)
+                        .error(R.drawable.error_loading_image)
+                        .into(trailerThumbnail);
+            }
+
+            else{
+                Toast.makeText(mContext, "No Trailers Found", Toast.LENGTH_SHORT).show();
+            }
+
 
         }
 
