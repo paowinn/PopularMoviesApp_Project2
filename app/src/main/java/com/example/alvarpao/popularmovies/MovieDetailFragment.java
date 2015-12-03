@@ -75,14 +75,10 @@ public class MovieDetailFragment extends Fragment {
         mBtnFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MovieDetailActivity)getActivity()).saveFavoriteMovieDetails(mMovie);
+                ((MovieDetailActivity) getActivity()).saveFavoriteMovieDetails(mMovie);
             }
         });
 
-
-        // Query the local database to determine if the movie in the current detail view is
-        // in the user's favorite list
-        checkIfFavorite();
 
         return rootView;
     }
@@ -91,7 +87,14 @@ public class MovieDetailFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // To make sure the view hierarchy is not null for this fragment (since some of its
+        // views are going to be instantiated by the code called here) the fetching of
+        // the movie's runtime, trailers and reviews is done here, right after onCreateView() is
+        // done
         getExtraMovieInfo();
+        // Query the local database to determine if the movie in the current detail view is
+        // in the user's favorite list
+        checkIfFavorite();
     }
 
     private void checkIfFavorite() {
