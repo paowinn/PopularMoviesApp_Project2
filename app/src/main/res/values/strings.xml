@@ -47,4 +47,6 @@
     <string name="error_saving_favorite">There was an error trying to save all the movie\'s details to your favorite\'s list</string>
     <string name="error_deleting_favorite">The movie could not be removed from your favorite\'s list</string>
 
+    <string name="no_trailers_found">No trailers found for this movie</string>
+
 </resources>
