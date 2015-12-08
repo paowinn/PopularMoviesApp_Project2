@@ -1,0 +1,108 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/originalTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/teal500"
+            android:paddingBottom="@dimen/original_title_padding_bottom"
+            android:paddingLeft="@dimen/original_title_padding_left"
+            android:paddingRight="@dimen/original_title_padding_right"
+            android:paddingTop="@dimen/original_title_padding_top"
+            android:text="@string/original_title"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/white"
+            android:textSize="@dimen/original_title_font_size" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/layout_details_left_margin"
+            android:layout_marginTop="@dimen/layout_details_top_margin"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/moviePoster"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="@dimen/details_info_left_margin"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/releaseYear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:text="@string/release_year"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textSize="@dimen/release_year_font_size" />
+
+                <TextView
+                    android:id="@+id/runtime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:text="@string/runtime"
+                    android:textSize="@dimen/runtime_font_size"
+                    android:textStyle="italic" />
+
+                <TextView
+                    android:id="@+id/userRating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginTop="@dimen/user_rating_top_margin"
+                    android:text="@string/user_rating"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textSize="@dimen/user_rating_font_size"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnFavorite"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/left_margin_favorite_button"
+                    android:paddingLeft="@dimen/left_padding_favorite_button"
+                    android:scaleType="fitStart"
+                    android:src="@drawable/star" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/plotSynopsis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/synopsis_bottom_margin"
+            android:layout_marginLeft="@dimen/synopsis_left_margin"
+            android:layout_marginRight="@dimen/synopsis_right_margin"
+            android:layout_marginTop="@dimen/synopsis_top_margin"
+            android:gravity="left"
+            android:inputType="textMultiLine"
+            android:text="@string/plot_synopsis"
+            android:textSize="@dimen/synopsis_font_size" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/height_horizontal_divider"
+            android:background="@color/silverGray" />
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
+

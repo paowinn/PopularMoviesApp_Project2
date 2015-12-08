@@ -1,9 +1,5 @@
 package com.example.alvarpao.popularmovies;
 
-/**
- * Created by alvarpao on 12/2/2015.
- */
-
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
@@ -16,16 +12,17 @@ import android.widget.ImageButton;
 import com.example.alvarpao.popularmovies.data.FavoriteMoviesContract;
 import com.example.alvarpao.popularmovies.data.FavoriteMoviesDbHelper;
 
+/**
+ * Created by alvarpao on 12/7/2015.
+ */
 public class QueryIfFavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
 
     private SQLiteDatabase mDatabase;
+    private final String LOG_TAG = QueryIfFavoriteMovieTask.class.getSimpleName();
     private Movie mMovie;
-    private final Context mContext;
-    private static final String LOG_TAG = QueryIfFavoriteMovieTask.class.getSimpleName();
+    private Context mContext;
 
-    public QueryIfFavoriteMovieTask(Context context) {
-        mContext = context;
-    }
+    public QueryIfFavoriteMovieTask(Context context) { mContext = context; }
 
     private Boolean queryIfFavorite() {
 

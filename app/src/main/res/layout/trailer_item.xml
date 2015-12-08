@@ -1,6 +1,6 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/trailer_cardview_layout_height"
+    android:layout_height="wrap_content"
     android:layout_margin="@dimen/trailer_cardview_layout_margin">
 
     <RelativeLayout

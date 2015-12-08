@@ -48,5 +48,6 @@
     <string name="error_deleting_favorite">The movie could not be removed from your favorite\'s list</string>
 
     <string name="no_trailers_found">No trailers found for this movie</string>
+    <string name="no_match_view_type">No match for view type:\u0020</string>
 
 </resources>

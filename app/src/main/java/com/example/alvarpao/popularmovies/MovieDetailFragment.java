@@ -14,12 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,10 +25,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -46,16 +40,12 @@ public class MovieDetailFragment extends Fragment {
     static final String MOVIE_DETAILS = "movie_details";
 
     private Movie mMovie;
-    private ImageButton mBtnFavorite;
-    private TrailerRecyclerAdapter mTrailerAdapter;
+    private MovieDetailsRecyclerAdapter mMovieDetailsAdapter;
+    private RecyclerView mMovieDetailsRecyclerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        // Decimal format for user rating
-        DecimalFormat decimalFormat = new DecimalFormat("##.#");
-        decimalFormat.setRoundingMode(RoundingMode.HALF_UP);
 
         View rootView = inflater.inflate(R.layout.movie_detail_fragment, container, false);
 
@@ -69,44 +59,18 @@ public class MovieDetailFragment extends Fragment {
             arguments = getActivity().getIntent().getExtras();
 
         if(arguments != null)
-        {
-            mMovie = arguments.getParcelable(MOVIE_DETAILS);
+         mMovie = arguments.getParcelable(MOVIE_DETAILS);
 
-            ImageView moviePoster = ((ImageView) rootView.findViewById(R.id.moviePoster));
-
-            //Using Picasso open source library to facilitate loading images and caching
-            Picasso.with(getContext())
-                    .load(mMovie.getImageURL())
-                    .placeholder(R.drawable.image_loading)
-                    .error(R.drawable.error_loading_image)
-                    .into(moviePoster);
-
-            ((TextView)rootView.findViewById(R.id.originalTitle)).setText(mMovie.getOriginalTitle());
-            ((TextView)rootView.findViewById(R.id.plotSynopsis)).setText(mMovie.getPlotSynopsis());
-            ((TextView)rootView.findViewById(R.id.userRating)).setText(
-                    Double.valueOf(decimalFormat.format(mMovie.getUserRating())).toString() +
-                            getString(R.string.user_rating_of_ten));
-            ((TextView)rootView.findViewById(R.id.releaseYear)).setText(mMovie.getReleaseYear());
-
-        }
-
-        mBtnFavorite = (ImageButton)rootView.findViewById(R.id.imgBtnFavorite);
-        mBtnFavorite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((MovieDetailActivity) getActivity()).saveFavoriteMovieDetails(mMovie);
-            }
-        });
-
-        // Initialize trailers' recycler view
-        RecyclerView trailersRecyclerView = (RecyclerView)
-                rootView.findViewById(R.id.trailersRecyclerView);
-        trailersRecyclerView.setLayoutManager(new LinearLayoutManager(trailersRecyclerView.getContext()));
+        // Initialize Movie Details' recycler view
+        mMovieDetailsRecyclerView = (RecyclerView)
+                rootView.findViewById(R.id.movieDetailsRecyclerViewer);
+        mMovieDetailsRecyclerView.setLayoutManager(new LinearLayoutManager(mMovieDetailsRecyclerView.getContext()));
+        mMovieDetailsRecyclerView.setItemAnimator(null);
 
         // Initially the data set is empty, it is not after the view is created that the getExtraMovieInfo()
         // is called and trailer adapter is populated
-        mTrailerAdapter = new TrailerRecyclerAdapter(getActivity(), mMovie.trailers);
-        trailersRecyclerView.setAdapter(mTrailerAdapter);
+        mMovieDetailsAdapter = new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mMovie.trailers);
+        mMovieDetailsRecyclerView.setAdapter(mMovieDetailsAdapter);
 
         return rootView;
     }
@@ -120,21 +84,6 @@ public class MovieDetailFragment extends Fragment {
         // the movie's runtime, trailers and reviews is done here, right after onCreateView() is
         // done
         getExtraMovieInfo();
-        // Query the local database to determine if the movie in the current detail view is
-        // in the user's favorite list
-        checkIfFavorite();
-    }
-
-    private void checkIfFavorite() {
-
-        // Query the local database to determine if the movie in the current detail view is
-        // in the user's favorite list. If so, change the image of the "Mark Favorite" button
-        // to "Favorite" and change the onClick method appropriate to delete the movie from
-        // the database if clicked again.
-        QueryIfFavoriteMovieTask queryIfFavoriteMovieTask =
-                new QueryIfFavoriteMovieTask(getActivity());
-        queryIfFavoriteMovieTask.execute(mMovie);
-
     }
 
     private void getExtraMovieInfo() {
@@ -347,14 +296,16 @@ public class MovieDetailFragment extends Fragment {
                 ((TextView) getActivity().findViewById(R.id.runtime))
                         .setText((new Integer(mMovie.getRuntime())).toString() +
                                 getString(R.string.runtime_units));
+                mMovieDetailsAdapter.notifyItemChanged(0);
 
                 // If the movie has any trailers, populate the adapter
                 if(mMovie.trailers.size() != 0) {
                     int trailerIndex = 0;
                     for(Trailer trailer : mMovie.trailers) {
-                        mTrailerAdapter.addItem(trailerIndex, trailer);
+                        mMovieDetailsAdapter.addTrailerItem(trailerIndex, trailer);
                         trailerIndex++;
                     }
+                    mMovieDetailsRecyclerView.scrollToPosition(0);
                 }
 
                 else{
@@ -368,5 +319,4 @@ public class MovieDetailFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
         }
     }
-
 }
