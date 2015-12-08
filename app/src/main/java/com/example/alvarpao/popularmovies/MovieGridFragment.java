@@ -527,6 +527,20 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 for(Movie movie : movies) {
                     mMovieAdapter.add(movie);
                 }
+
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
+                        getString(R.string.sort_preference_default));
+
+                // Get the current selected sort option. If it is "Favorites", Check if device is
+                // in two-pane mode. If that is the case show an instance of the detail fragment
+                // with the info of the first movie in the favorite list of movies
+                if(paramSortValue.equals(getString(R.string.sort_favorites_value))) {
+                    if (((MainActivity) getActivity()).getLayoutMode()) {
+                        Movie firstMovie = mMovieAdapter.getItem(0);
+                        ((Callback) getActivity()).onItemSelected(firstMovie);
+                    }
+                }
             }
 
             else if(movies == null && !Utility.deviceIsConnected(getActivity()))

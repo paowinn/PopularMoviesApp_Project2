@@ -93,7 +93,6 @@ public class MovieDetailFragment extends Fragment {
         fetchExtraMovieInfoTask.execute(mMovie);
     }
 
-
     public class FetchExtraMovieInfoTask extends AsyncTask<Movie, Void, Boolean> {
 
         private final String LOG_TAG = FetchExtraMovieInfoTask.class.getSimpleName();
@@ -292,25 +291,26 @@ public class MovieDetailFragment extends Fragment {
 
             if (result != null) {
 
-                // Populate the movie details view with the movie's runtime
-                ((TextView) getActivity().findViewById(R.id.runtime))
-                        .setText((new Integer(mMovie.getRuntime())).toString() +
-                                getString(R.string.runtime_units));
-                mMovieDetailsAdapter.notifyItemChanged(0);
+                if(getActivity().findViewById(R.id.runtime) != null) {
+                    // Populate the movie details view with the movie's runtime
+                    ((TextView) getActivity().findViewById(R.id.runtime))
+                            .setText((new Integer(mMovie.getRuntime())).toString() +
+                                    getString(R.string.runtime_units));
+                    mMovieDetailsAdapter.notifyItemChanged(0);
 
-                // If the movie has any trailers, populate the adapter
-                if(mMovie.trailers.size() != 0) {
-                    int trailerIndex = 0;
-                    for(Trailer trailer : mMovie.trailers) {
-                        mMovieDetailsAdapter.addTrailerItem(trailerIndex, trailer);
-                        trailerIndex++;
+
+                    // If the movie has any trailers, populate the adapter
+                    if (mMovie.trailers.size() != 0) {
+                        int trailerIndex = 0;
+                        for (Trailer trailer : mMovie.trailers) {
+                            mMovieDetailsAdapter.addTrailerItem(trailerIndex, trailer);
+                            trailerIndex++;
+                        }
+                        mMovieDetailsRecyclerView.scrollToPosition(0);
+                    } else {
+                        Toast.makeText(getActivity(), getString(R.string.no_trailers_found),
+                                Toast.LENGTH_SHORT).show();
                     }
-                    mMovieDetailsRecyclerView.scrollToPosition(0);
-                }
-
-                else{
-                    Toast.makeText(getActivity(), getString(R.string.no_trailers_found),
-                            Toast.LENGTH_SHORT).show();
                 }
             }
 
