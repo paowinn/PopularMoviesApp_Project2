@@ -1,6 +1,8 @@
 package com.example.alvarpao.popularmovies;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -9,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -26,6 +27,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
 
     private static final int TYPE_MOVIE_DETAILS_HEADER = 0;
     private static final int TYPE_TRAILER_ITEM = 1;
+    private static final String TRAILER_URL_PREFIX = "https://www.youtube.com/watch?v=";
 
     private Movie mMovie;
     private List<Trailer> mTrailerList;
@@ -37,7 +39,9 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             TrailerViewHolder holder = (TrailerViewHolder) view.getTag();
             int position = holder.getAdapterPosition();
             Trailer trailer = mTrailerList.get(position-1);
-            Toast.makeText(mContext, trailer.getName(), Toast.LENGTH_SHORT).show();
+            Intent playTrailerIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse(TRAILER_URL_PREFIX + trailer.getSource()));
+            mContext.startActivity(playTrailerIntent);
         }
     };
 
