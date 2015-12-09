@@ -22,9 +22,16 @@
     <dimen name="left_margin_favorite_button">0dp</dimen>
     <dimen name="left_padding_favorite_button">0dp</dimen>
     <dimen name="height_horizontal_divider">2dp</dimen>
-    <dimen name="trailer_cardview_layout_margin">8dp</dimen>
-    <dimen name="trailer_relative_layout_height">80dp</dimen>
     <dimen name="trailer_title_padding">8dp</dimen>
     <dimen name="trailer_title_font_size">14sp</dimen>
-    <dimen name="trailers_top_margin">20dp</dimen>
+    <dimen name="trailer_top_margin">20dp</dimen>
+    <dimen name="review_author_font_size">14sp</dimen>
+    <dimen name="review_content_font_size">14sp</dimen>
+    <dimen name="review_author_layout_margin_bottom">10dp</dimen>
+    <dimen name="review_content_layout_margin_bottom">10dp</dimen>
+    <dimen name="review_read_more_icon_width">32dp</dimen>
+    <dimen name="review_read_more_icon_height">32dp</dimen>
+    <dimen name="review_top_margin">30dp</dimen>
+    <dimen name="review_right_margin">10dp</dimen>
+    <dimen name="review_right_padding">10dp</dimen>
 </resources>

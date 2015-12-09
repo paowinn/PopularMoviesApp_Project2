@@ -5,12 +5,16 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -27,28 +31,76 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
 
     private static final int TYPE_MOVIE_DETAILS_HEADER = 0;
     private static final int TYPE_TRAILER_ITEM = 1;
+    private static final int TYPE_REVIEW_ITEM = 2;
     private static final String TRAILER_URL_PREFIX = "https://www.youtube.com/watch?v=";
 
     private Movie mMovie;
     private List<Trailer> mTrailerList;
+    private List<Review> mReviewList;
     private Context mContext;
+    private SparseBooleanArray mTrailerSelectedItems;
+    private int mSelectedTrailerPosition = 1;
+    private TrailerViewHolder mTrailerViewHolder;
+    private SparseBooleanArray mReviewSelectedItems;
+    private int mSelectedReviewPosition = 1;
 
     View.OnClickListener trailerClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            TrailerViewHolder holder = (TrailerViewHolder) view.getTag();
-            int position = holder.getAdapterPosition();
+            mTrailerViewHolder = (TrailerViewHolder) view.getTag();
+            int position = mTrailerViewHolder.getAdapterPosition();
+
+            // Save the selected positions to the boolean array
+            if(mTrailerSelectedItems.get(position-1, false)){
+                mTrailerSelectedItems.delete(position-1);
+                mTrailerViewHolder.backgroundTailer.setSelected(false);
+            }
+
+            else{
+                mTrailerSelectedItems.put(position-1, true);
+                mTrailerViewHolder.backgroundTailer.setSelected(true);
+                mSelectedTrailerPosition = position - 1;
+            }
+
             Trailer trailer = mTrailerList.get(position-1);
             Intent playTrailerIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(TRAILER_URL_PREFIX + trailer.getSource()));
-            mContext.startActivity(playTrailerIntent);
+            ((MovieDetailActivity)mContext).startActivityForResult(playTrailerIntent, 1);
         }
     };
 
-    public MovieDetailsRecyclerAdapter(Context context, Movie movie, List<Trailer> trailerList) {
+    View.OnClickListener reviewClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            ReviewViewHolder holder = (ReviewViewHolder) view.getTag();
+            int position = holder.getAdapterPosition();
+            int reviewPosition = (position - mTrailerList.size()) - 1;
+
+            // Save the selected positions to the boolean array
+            if(mReviewSelectedItems.get(reviewPosition, false)){
+                mReviewSelectedItems.delete(reviewPosition);
+                holder.backgroundReview.setSelected(false);
+            }
+
+            else{
+                mReviewSelectedItems.put(reviewPosition, true);
+                holder.backgroundReview.setSelected(true);
+                mSelectedReviewPosition = reviewPosition;
+            }
+
+            Review review = mReviewList.get(reviewPosition);
+            Toast.makeText(mContext, review.getAuthor(), Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    public MovieDetailsRecyclerAdapter(Context context, Movie movie, List<Trailer> trailerList,
+                                       List<Review> reviewList) {
         this.mContext = context;
         this.mMovie = movie;
         this.mTrailerList = trailerList;
+        this.mReviewList = reviewList;
+        mTrailerSelectedItems = new SparseBooleanArray(mTrailerList.size());
+        mReviewSelectedItems = new SparseBooleanArray(mReviewList.size());
     }
 
     @Override
@@ -64,12 +116,22 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             return new TrailerViewHolder(view);
         }
 
+        else if(viewType == TYPE_REVIEW_ITEM){
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.review_item, parent, false);
+            return new ReviewViewHolder(view);
+        }
+
         throw new RuntimeException(mContext.getString(R.string.no_match_view_type)+ viewType);
     }
 
     private Trailer getTrailerItem(int position)
     {
         return mTrailerList.get(position);
+    }
+
+    private Review getReviewItem(int position)
+    {
+        return mReviewList.get(position);
     }
 
     private String buildThumbnailURL(String source)
@@ -93,6 +155,11 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
                 new QueryIfFavoriteMovieTask(mContext);
         queryIfFavoriteMovieTask.execute(mMovie);
 
+    }
+
+    public void deselectTrailerItem(){
+        mTrailerSelectedItems.delete(mSelectedTrailerPosition);
+        mTrailerViewHolder.backgroundTailer.setSelected(false);
     }
 
     @Override
@@ -137,6 +204,9 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             Trailer trailer = getTrailerItem(position - 1);
             TrailerViewHolder trailerViewHolder = (TrailerViewHolder)viewHolder;
 
+            // Set the selected state of the trailer item depending on its position
+            trailerViewHolder.backgroundTailer.setSelected(mTrailerSelectedItems.get(position - 1, false));
+
             String thumbnailURL = buildThumbnailURL(trailer.getSource());
             // Load the image using picasso library
             Picasso.with(mContext).load(thumbnailURL)
@@ -154,12 +224,40 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             trailerViewHolder.trailerTitle.setTag(trailerViewHolder);
             trailerViewHolder.trailerThumbnail.setTag(trailerViewHolder);
         }
+
+        else if(viewHolder instanceof ReviewViewHolder) {
+
+            Review review = getReviewItem((position - mTrailerList.size()) - 1);
+            ReviewViewHolder reviewViewHolder = (ReviewViewHolder)viewHolder;
+
+            // Set the selected state of the review item depending on its position
+            reviewViewHolder.backgroundReview.setSelected(
+                    mReviewSelectedItems.get((position - mTrailerList.size()) - 1, false));
+
+            // Setting the review's author
+            reviewViewHolder.reviewAuthor.setText(Html.fromHtml(review.getAuthor()));
+            // Setting the review's content
+            reviewViewHolder.reviewContent.setText(Html.fromHtml(review.getContent()));
+
+            // Handle click event on all the reviews's author, content and read more icon
+            reviewViewHolder.reviewAuthor.setOnClickListener(reviewClickListener);
+            reviewViewHolder.reviewContent.setOnClickListener(reviewClickListener);
+            reviewViewHolder.readMoreIcon.setOnClickListener(reviewClickListener);
+
+            reviewViewHolder.reviewAuthor.setTag(reviewViewHolder);
+            reviewViewHolder.reviewContent.setTag(reviewViewHolder);
+            reviewViewHolder.readMoreIcon.setTag(reviewViewHolder);
+        }
     }
 
     @Override
     public int getItemViewType(int position) {
         if(isPositionHeader(position))
             return TYPE_MOVIE_DETAILS_HEADER;
+
+        else if(position > mTrailerList.size())
+            return TYPE_REVIEW_ITEM;
+
         return TYPE_TRAILER_ITEM;
     }
 
@@ -169,7 +267,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
 
     @Override
     public int getItemCount() {
-        return mTrailerList.size() + 1;
+        return (mTrailerList.size() + mReviewList.size() + 1);
     }
 
     public void addTrailerItem(int position, Trailer trailer) {
@@ -177,14 +275,36 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
         notifyItemInserted(position);
     }
 
+    public void addReviewItem(int position, Review review) {
+        mReviewList.add(position, review);
+        notifyItemInserted(position);
+    }
+
     class TrailerViewHolder extends RecyclerView.ViewHolder {
         ImageView trailerThumbnail;
         TextView trailerTitle;
+        RelativeLayout backgroundTailer;
 
         public TrailerViewHolder(View view) {
             super(view);
             this.trailerThumbnail = (ImageView) view.findViewById(R.id.trailerThumbnail);
             this.trailerTitle = (TextView) view.findViewById(R.id.trailerTitle);
+            this.backgroundTailer = (RelativeLayout) view.findViewById(R.id.backgroundTrailer);
+        }
+    }
+
+    class ReviewViewHolder extends RecyclerView.ViewHolder {
+        TextView reviewAuthor;
+        TextView reviewContent;
+        ImageView readMoreIcon;
+        LinearLayout backgroundReview;
+
+        public ReviewViewHolder(View view) {
+            super(view);
+            this.reviewAuthor = (TextView) view.findViewById(R.id.reviewAuthor);
+            this.reviewContent = (TextView) view.findViewById(R.id.reviewContent);
+            this.readMoreIcon = (ImageView) view.findViewById(R.id.imgReadMoreReview);
+            this.backgroundReview = (LinearLayout) view.findViewById(R.id.backgroundReview);
         }
     }
 

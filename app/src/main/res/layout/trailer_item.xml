@@ -1,11 +1,14 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/trailer_cardview_layout_margin">
+    android:layout_marginTop="@dimen/trailer_top_margin"
+    android:layout_marginLeft="@dimen/synopsis_left_margin">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/trailer_relative_layout_height">
+        android:layout_height="wrap_content"
+        android:background="@drawable/trailer_review_selector"
+        android:id="@+id/backgroundTrailer">
 
         <ImageView
             android:id="@+id/trailerThumbnail"

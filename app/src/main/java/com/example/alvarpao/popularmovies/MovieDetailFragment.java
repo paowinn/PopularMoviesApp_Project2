@@ -69,7 +69,7 @@ public class MovieDetailFragment extends Fragment {
 
         // Initially the data set is empty, it is not after the view is created that the getExtraMovieInfo()
         // is called and trailer adapter is populated
-        mMovieDetailsAdapter = new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mMovie.trailers);
+        mMovieDetailsAdapter = new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mMovie.trailers, mMovie.reviews);
         mMovieDetailsRecyclerView.setAdapter(mMovieDetailsAdapter);
 
         return rootView;
@@ -91,6 +91,10 @@ public class MovieDetailFragment extends Fragment {
         // view
         FetchExtraMovieInfoTask fetchExtraMovieInfoTask = new FetchExtraMovieInfoTask();
         fetchExtraMovieInfoTask.execute(mMovie);
+    }
+
+    public void deselectTrailerItem(){
+        mMovieDetailsAdapter.deselectTrailerItem();
     }
 
     public class FetchExtraMovieInfoTask extends AsyncTask<Movie, Void, Boolean> {
@@ -299,16 +303,28 @@ public class MovieDetailFragment extends Fragment {
                     mMovieDetailsAdapter.notifyItemChanged(0);
 
 
-                    // If the movie has any trailers, populate the adapter
+                    // If the movie has any trailers, populate the adapter with them
                     if (mMovie.trailers.size() != 0) {
                         int trailerIndex = 0;
                         for (Trailer trailer : mMovie.trailers) {
                             mMovieDetailsAdapter.addTrailerItem(trailerIndex, trailer);
                             trailerIndex++;
                         }
-                        mMovieDetailsRecyclerView.scrollToPosition(0);
                     } else {
                         Toast.makeText(getActivity(), getString(R.string.no_trailers_found),
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    // If the movie has any reviews, populate the adapter with them
+                    if (mMovie.reviews.size() != 0) {
+                        int reviewIndex = 0;
+                        for (Review review : mMovie.reviews) {
+                            mMovieDetailsAdapter.addReviewItem(reviewIndex, review);
+                            reviewIndex++;
+                        }
+                        mMovieDetailsRecyclerView.scrollToPosition(0);
+                    } else {
+                        Toast.makeText(getActivity(), getString(R.string.no_reviews_found),
                                 Toast.LENGTH_SHORT).show();
                     }
                 }

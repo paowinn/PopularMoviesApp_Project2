@@ -1,5 +1,6 @@
 package com.example.alvarpao.popularmovies;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
@@ -9,6 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 
 public class MovieDetailActivity extends ActionBarActivity{
 
+    private MovieDetailFragment mMovieDetailFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -16,8 +18,9 @@ public class MovieDetailActivity extends ActionBarActivity{
         setContentView(R.layout.movie_detail);
 
         if(savedInstanceState == null){
+            mMovieDetailFragment = new MovieDetailFragment();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.movie_details_container, new MovieDetailFragment())
+                    .add(R.id.movie_details_container, mMovieDetailFragment)
                     .commit();
         }
     }
@@ -35,5 +38,12 @@ public class MovieDetailActivity extends ActionBarActivity{
         SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
                 new SaveFavoriteMovieDetailsTask(this);
         saveFavoriteMovieDetailsTask.execute(movie);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(requestCode == 1)
+          mMovieDetailFragment.deselectTrailerItem();
     }
 }

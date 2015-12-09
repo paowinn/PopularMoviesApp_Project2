@@ -98,10 +98,6 @@
             android:text="@string/plot_synopsis"
             android:textSize="@dimen/synopsis_font_size" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_horizontal_divider"
-            android:background="@color/silverGray" />
     </LinearLayout>
 
 </android.support.v7.widget.CardView>
