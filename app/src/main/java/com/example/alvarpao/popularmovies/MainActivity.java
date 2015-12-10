@@ -78,7 +78,7 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
                 getString(R.string.sort_preference_default));
     }
 
-    public boolean getLayoutMode()
+    public boolean inTwoPaneLayout()
     {
         return mTwoPaneLayout;
     }
@@ -115,6 +115,17 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
             intent.putExtra(MovieDetailFragment.MOVIE_DETAILS, movie);
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void clearDetailsFragment() {
+
+        // Only called when in two-pane layout, make sure the MovieDetailFragment is empty
+        mDetailsFragment = new MovieDetailFragment();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_details_container, mDetailsFragment,
+                        MOVIE_DETAILS_FRAGMENT_TAG)
+                .commit();
     }
 
     @Override

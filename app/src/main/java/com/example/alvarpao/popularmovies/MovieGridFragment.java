@@ -72,6 +72,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
         // The MainActivity will have to implement this method
         public void onItemSelected(Movie movie);
+        public void clearDetailsFragment();
     }
 
 
@@ -210,7 +211,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                     // being fetched is page 1 (as a result of a change in the sort option or when
                     // the app is first loaded) show an instance of the detail fragment with the
                     // info of the first movie in the returned list of movies
-                    if ((mPageToFetch == 1) && ((MainActivity) getActivity()).getLayoutMode()) {
+                    if ((mPageToFetch == 1) && ((MainActivity) getActivity()).inTwoPaneLayout()) {
                         Movie firstMovie = mMovieAdapter.getItem(0);
                         ((Callback) getActivity()).onItemSelected(firstMovie);
                     }
@@ -536,9 +537,14 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 // in two-pane mode. If that is the case show an instance of the detail fragment
                 // with the info of the first movie in the favorite list of movies
                 if(paramSortValue.equals(getString(R.string.sort_favorites_value))) {
-                    if (((MainActivity) getActivity()).getLayoutMode()) {
-                        Movie firstMovie = mMovieAdapter.getItem(0);
-                        ((Callback) getActivity()).onItemSelected(firstMovie);
+                    if (((MainActivity) getActivity()).inTwoPaneLayout()) {
+                        if(mMovieAdapter.getCount() > 0) {
+                            Movie firstMovie = mMovieAdapter.getItem(0);
+                            ((Callback) getActivity()).onItemSelected(firstMovie);
+                        }
+                        else{
+                            ((Callback) getActivity()).clearDetailsFragment();
+                        }
                     }
                 }
             }
