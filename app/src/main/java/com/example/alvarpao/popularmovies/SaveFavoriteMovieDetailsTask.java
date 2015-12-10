@@ -287,12 +287,23 @@ public class SaveFavoriteMovieDetailsTask extends AsyncTask<Movie, Void, Boolean
                 @Override
                 public void onClick(View v) {
                     Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
-                    ((MovieDetailActivity)mContext).deleteMovieFromFavorites(mMovie);
+                    //One-pane layout being displayed
+                    if (mContext instanceof MovieDetailActivity)
+                        ((MovieDetailActivity) mContext).deleteMovieFromFavorites(mMovie);
+                    //Two-pane layout being displayed
+                    else if(mContext instanceof MainActivity)
+                        ((MainActivity) mContext).deleteMovieFromFavorites(mMovie);
+
                     btnFavorite.setImageResource(R.drawable.star);
                     btnFavorite.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ((MovieDetailActivity)mContext).saveFavoriteMovieDetails(mMovie);
+                            //One-pane layout being displayed
+                            if (mContext instanceof MovieDetailActivity)
+                                ((MovieDetailActivity) mContext).saveFavoriteMovieDetails(mMovie);
+                            //Two-pane layout being displayed
+                            else if (mContext instanceof MainActivity)
+                                ((MainActivity) mContext).saveFavoriteMovieDetails(mMovie);
                         }
                     });
                 }

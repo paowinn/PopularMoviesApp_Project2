@@ -135,4 +135,12 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
                 new SaveFavoriteMovieDetailsTask(this);
         saveFavoriteMovieDetailsTask.execute(movie);
     }
+
+    public void deleteMovieFromFavorites(Movie movie){
+
+        // Delete the current movie from the user's favorite list (called from
+        // QueryIfFavoriteMovieTask class when in two-pane layout)
+        DeleteFavoriteMovieTask deleteFavoriteMovieTask = new DeleteFavoriteMovieTask(this);
+        deleteFavoriteMovieTask.execute(movie);
+    }
 }
