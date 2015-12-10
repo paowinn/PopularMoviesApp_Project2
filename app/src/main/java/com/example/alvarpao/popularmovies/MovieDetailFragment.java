@@ -85,6 +85,7 @@ public class MovieDetailFragment extends Fragment {
         fetchExtraMovieInfoTask.execute(mMovie);
     }
 
+    // It deselects a trailer in the recycler view after the youtube video has been launched
     public void deselectTrailerItem(){
         mMovieDetailsAdapter.deselectTrailerItem();
     }
@@ -314,11 +315,14 @@ public class MovieDetailFragment extends Fragment {
                             mMovieDetailsAdapter.addReviewItem(reviewIndex, review);
                             reviewIndex++;
                         }
-                        mMovieDetailsRecyclerView.scrollToPosition(0);
                     } else {
                         Toast.makeText(getActivity(), getString(R.string.no_reviews_found),
                                 Toast.LENGTH_SHORT).show();
                     }
+
+                    // Scroll to position 0 (Movie details header) so the user see the
+                    // details first instead of the last item of the reviews or trailers
+                    mMovieDetailsRecyclerView.scrollToPosition(0);
                 }
             }
 

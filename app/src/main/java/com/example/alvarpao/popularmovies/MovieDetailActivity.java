@@ -43,6 +43,8 @@ public class MovieDetailActivity extends ActionBarActivity{
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+        // This method gets called from the MovieDetailsRecylerAdapter class to deselect a
+        // trailer after the youtube video has been launched
         if(requestCode == 1)
           mMovieDetailFragment.deselectTrailerItem();
     }

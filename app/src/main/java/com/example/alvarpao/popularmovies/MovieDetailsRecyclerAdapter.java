@@ -51,21 +51,26 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             mTrailerViewHolder = (TrailerViewHolder) view.getTag();
             int position = mTrailerViewHolder.getAdapterPosition();
 
-            // Save the selected positions to the boolean array
+            // Save the selected position to the boolean array, to keep track of the selected
+            // item
             if(mTrailerSelectedItems.get(position-1, false)){
+                // If selected when clicked, deselect it
                 mTrailerSelectedItems.delete(position-1);
                 mTrailerViewHolder.backgroundTailer.setSelected(false);
             }
 
             else{
+                // If not selected when clicked, select it
                 mTrailerSelectedItems.put(position-1, true);
                 mTrailerViewHolder.backgroundTailer.setSelected(true);
                 mSelectedTrailerPosition = position - 1;
             }
 
             Trailer trailer = mTrailerList.get(position-1);
+            // Launch the youtube app or browser when the trailer is selected in order to view it
             Intent playTrailerIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(TRAILER_URL_PREFIX + trailer.getSource()));
+            // After it is launched, deselect the selected trailer
             ((Activity)mContext).startActivityForResult(playTrailerIntent, 1);
         }
     };
@@ -77,13 +82,16 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             int position = holder.getAdapterPosition();
             int reviewPosition = (position - mTrailerList.size()) - 1;
 
-            // Save the selected positions to the boolean array
+            // Save the selected position to the boolean array, to keep track of the selected
+            // item
             if(mReviewSelectedItems.get(reviewPosition, false)){
+                // If selected when clicked, deselect it
                 mReviewSelectedItems.delete(reviewPosition);
                 holder.backgroundReview.setSelected(false);
             }
 
             else{
+                // If not selected when clicked, select it
                 mReviewSelectedItems.put(reviewPosition, true);
                 holder.backgroundReview.setSelected(true);
                 mSelectedReviewPosition = reviewPosition;
