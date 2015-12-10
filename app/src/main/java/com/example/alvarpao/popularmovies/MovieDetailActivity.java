@@ -45,7 +45,7 @@ public class MovieDetailActivity extends ActionBarActivity{
 
         // This method gets called from the MovieDetailsRecylerAdapter class to deselect a
         // trailer after the youtube video has been launched
-        if(requestCode == 1)
+        if(requestCode == MovieDetailsRecyclerAdapter.TRAILER_SELECTED)
           mMovieDetailFragment.deselectTrailerItem();
     }
 }

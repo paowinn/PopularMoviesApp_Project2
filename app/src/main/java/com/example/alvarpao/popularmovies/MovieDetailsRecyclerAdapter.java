@@ -34,6 +34,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
     private static final int TYPE_TRAILER_ITEM = 1;
     private static final int TYPE_REVIEW_ITEM = 2;
     private static final String TRAILER_URL_PREFIX = "https://www.youtube.com/watch?v=";
+    public static final int TRAILER_SELECTED = 1;
 
     private Movie mMovie;
     private List<Trailer> mTrailerList;
@@ -73,7 +74,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             // After it is launched, deselect the selected trailer
             // Cast to Activity since the layout could be displayed in one-pane (MovieDetailActivity)
             // or in two-panes (MainActivity)
-            ((Activity)mContext).startActivityForResult(playTrailerIntent, 1);
+            ((Activity)mContext).startActivityForResult(playTrailerIntent, TRAILER_SELECTED);
         }
     };
 
