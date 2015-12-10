@@ -126,4 +126,13 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
         if(requestCode == MovieDetailsRecyclerAdapter.TRAILER_SELECTED)
            mDetailsFragment.deselectTrailerItem();
     }
+
+    public void saveFavoriteMovieDetails(Movie movie) {
+
+        // Save the current movie's details into the local database to keep the user's favorite
+        // list (called from MovieDetailsRecyclerAdapter when in two-pane layout)
+        SaveFavoriteMovieDetailsTask saveFavoriteMovieDetailsTask =
+                new SaveFavoriteMovieDetailsTask(this);
+        saveFavoriteMovieDetailsTask.execute(movie);
+    }
 }

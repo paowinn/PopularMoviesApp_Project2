@@ -203,7 +203,13 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             viewHolderHeader.imgBtnFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((MovieDetailActivity) mContext).saveFavoriteMovieDetails(mMovie);
+                    //One-pane layout being displayed
+                    if (mContext instanceof MovieDetailActivity)
+                        ((MovieDetailActivity) mContext).saveFavoriteMovieDetails(mMovie);
+
+                    //Two-pane layout being displayed
+                    else if(mContext instanceof MainActivity)
+                        ((MainActivity) mContext).saveFavoriteMovieDetails(mMovie);
                 }
             });
 
