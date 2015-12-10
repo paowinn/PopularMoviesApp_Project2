@@ -71,6 +71,8 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             Intent playTrailerIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(TRAILER_URL_PREFIX + trailer.getSource()));
             // After it is launched, deselect the selected trailer
+            // Cast to Activity since the layout could be displayed in one-pane (MovieDetailActivity)
+            // or in two-panes (MainActivity)
             ((Activity)mContext).startActivityForResult(playTrailerIntent, 1);
         }
     };

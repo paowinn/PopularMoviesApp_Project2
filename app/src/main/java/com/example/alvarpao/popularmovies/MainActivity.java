@@ -120,6 +120,9 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+        // This method gets called from the MovieDetailsRecylerAdapter class to deselect a
+        // trailer after the youtube video has been launched (called when in two-pane layout since
+        // Main Activity contains the details fragment in this case)
         if(requestCode == 1)
            mDetailsFragment.deselectTrailerItem();
     }
