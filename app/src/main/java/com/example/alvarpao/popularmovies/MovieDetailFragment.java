@@ -67,23 +67,15 @@ public class MovieDetailFragment extends Fragment {
         mMovieDetailsRecyclerView.setLayoutManager(new LinearLayoutManager(mMovieDetailsRecyclerView.getContext()));
         mMovieDetailsRecyclerView.setItemAnimator(null);
 
-        // Initially the data set is empty, it is not after the view is created that the getExtraMovieInfo()
-        // is called and trailer adapter is populated
-        mMovieDetailsAdapter = new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mMovie.trailers, mMovie.reviews);
-        mMovieDetailsRecyclerView.setAdapter(mMovieDetailsAdapter);
+        if (arguments != null) {
+            // Initially the trailers and reviews arrays are empty, it is not after the
+            // getExtraMovieInfo() is called that the adapter is populated.
+            mMovieDetailsAdapter = new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mMovie.trailers, mMovie.reviews);
+            mMovieDetailsRecyclerView.setAdapter(mMovieDetailsAdapter);
+            getExtraMovieInfo();
+        }
 
         return rootView;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        // To make sure the view hierarchy is not null for this fragment (since some of its
-        // views are going to be instantiated by the code called here) the fetching of
-        // the movie's runtime, trailers and reviews is done here, right after onCreateView() is
-        // done
-        getExtraMovieInfo();
     }
 
     private void getExtraMovieInfo() {

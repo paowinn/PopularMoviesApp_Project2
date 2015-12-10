@@ -14,6 +14,7 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
     private static final String MOVIE_DETAILS_FRAGMENT_TAG = "MOVIE_DETAILS_FRAG_TAG";
     private boolean mTwoPaneLayout;
     private String mSortOption;
+    MovieDetailFragment mDetailsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -97,11 +98,11 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
             // Pass the movie object as argument for the fragment
             args.putParcelable(MovieDetailFragment.MOVIE_DETAILS, movie);
 
-            MovieDetailFragment detailsFragment = new MovieDetailFragment();
-            detailsFragment.setArguments(args);
+            mDetailsFragment = new MovieDetailFragment();
+            mDetailsFragment.setArguments(args);
 
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.movie_details_container, detailsFragment,
+                    .replace(R.id.movie_details_container, mDetailsFragment,
                             MOVIE_DETAILS_FRAGMENT_TAG)
                     .commit();
         }
@@ -114,5 +115,12 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
             intent.putExtra(MovieDetailFragment.MOVIE_DETAILS, movie);
             startActivity(intent);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(requestCode == 1)
+           mDetailsFragment.deselectTrailerItem();
     }
 }

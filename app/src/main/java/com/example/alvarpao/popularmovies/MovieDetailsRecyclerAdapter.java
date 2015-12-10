@@ -1,5 +1,6 @@
 package com.example.alvarpao.popularmovies;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -65,7 +66,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             Trailer trailer = mTrailerList.get(position-1);
             Intent playTrailerIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(TRAILER_URL_PREFIX + trailer.getSource()));
-            ((MovieDetailActivity)mContext).startActivityForResult(playTrailerIntent, 1);
+            ((Activity)mContext).startActivityForResult(playTrailerIntent, 1);
         }
     };
 
