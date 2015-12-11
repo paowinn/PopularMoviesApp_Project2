@@ -71,6 +71,8 @@ public class MovieDetailFragment extends Fragment {
             // Initially the trailers and reviews arrays are empty, it is not after the
             // getExtraMovieInfo() is called that the adapter is populated.
             mMovieDetailsAdapter = new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mMovie.trailers, mMovie.reviews);
+            // Make sure the trailers and reviews for the adapter are reset
+            mMovieDetailsAdapter.clear();
             mMovieDetailsRecyclerView.setAdapter(mMovieDetailsAdapter);
             getExtraMovieInfo();
         }
@@ -288,45 +290,46 @@ public class MovieDetailFragment extends Fragment {
 
             if (result != null) {
 
-                if(getActivity().findViewById(R.id.runtime) != null) {
-                    // Populate the movie details view with the movie's runtime
-                    ((TextView) getActivity().findViewById(R.id.runtime))
-                            .setText((new Integer(mMovie.getRuntime())).toString() +
-                                    getString(R.string.runtime_units));
-                    mMovieDetailsAdapter.notifyItemChanged(0);
+                if (getActivity() != null) {
+                    if (getActivity().findViewById(R.id.runtime) != null) {
+                        // Populate the movie details view with the movie's runtime
+                        ((TextView) getActivity().findViewById(R.id.runtime))
+                                .setText((new Integer(mMovie.getRuntime())).toString() +
+                                        getString(R.string.runtime_units));
+                        mMovieDetailsAdapter.notifyItemChanged(0);
 
 
-                    // If the movie has any trailers, populate the adapter with them
-                    if (mMovie.trailers.size() != 0) {
-                        int trailerIndex = 0;
-                        for (Trailer trailer : mMovie.trailers) {
-                            mMovieDetailsAdapter.addTrailerItem(trailerIndex, trailer);
-                            trailerIndex++;
+                        // If the movie has any trailers, populate the adapter with them
+                        if (mMovie.trailers.size() != 0) {
+                            int trailerIndex = 0;
+                            for (Trailer trailer : mMovie.trailers) {
+                                mMovieDetailsAdapter.addTrailerItem(trailerIndex, trailer);
+                                trailerIndex++;
+                            }
+                        } else {
+                            Toast.makeText(getActivity(), getString(R.string.no_trailers_found),
+                                    Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        Toast.makeText(getActivity(), getString(R.string.no_trailers_found),
-                                Toast.LENGTH_SHORT).show();
-                    }
 
-                    // If the movie has any reviews, populate the adapter with them
-                    if (mMovie.reviews.size() != 0) {
-                        int reviewIndex = 0;
-                        for (Review review : mMovie.reviews) {
-                            mMovieDetailsAdapter.addReviewItem(reviewIndex, review);
-                            reviewIndex++;
+                        // If the movie has any reviews, populate the adapter with them
+                        if (mMovie.reviews.size() != 0) {
+                            int reviewIndex = 0;
+                            for (Review review : mMovie.reviews) {
+                                mMovieDetailsAdapter.addReviewItem(reviewIndex, review);
+                                reviewIndex++;
+                            }
+                        } else {
+                            Toast.makeText(getActivity(), getString(R.string.no_reviews_found),
+                                    Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        Toast.makeText(getActivity(), getString(R.string.no_reviews_found),
-                                Toast.LENGTH_SHORT).show();
-                    }
 
-                    // Scroll to position 0 (Movie details header) so the user see the
-                    // details first instead of the last item of the reviews or trailers
-                    mMovieDetailsRecyclerView.scrollToPosition(0);
+                        // Scroll to position 0 (Movie details header) so the user see the
+                        // details first instead of the last item of the reviews or trailers
+                        mMovieDetailsRecyclerView.scrollToPosition(0);
+                    }
                 }
-            }
 
-            else if(result == null && !Utility.deviceIsConnected(getActivity()))
+            } else if (result == null && !Utility.deviceIsConnected(getActivity()))
                 Toast.makeText(getActivity(), getString(R.string.no_internet_error),
                         Toast.LENGTH_SHORT).show();
         }

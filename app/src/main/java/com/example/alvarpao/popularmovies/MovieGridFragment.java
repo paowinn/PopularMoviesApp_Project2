@@ -157,11 +157,14 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
 
         mMoviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
+        mMoviesGridView.setDrawSelectorOnTop(true);
         mMoviesGridView.setAdapter(mMovieAdapter);
 
         mMoviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view,
                                     int position, long id) {
+                // This will force to draw the selector on top of the poster for the selected movie
+                view.setSelected(true);
                 Movie movie = mMovieAdapter.getItem(position);
 
                 // A movie has been selected so the MainActivity has to be notified to take

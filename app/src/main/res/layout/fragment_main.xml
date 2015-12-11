@@ -11,5 +11,6 @@
     android:verticalSpacing="@dimen/fragment_gridview_vertical_spacing"
     android:horizontalSpacing="@dimen/fragment_gridview_horizontal_spacing"
     android:stretchMode="columnWidth"
+    android:drawSelectorOnTop="true"
     tools:context=".MainActivityFragment" />
 

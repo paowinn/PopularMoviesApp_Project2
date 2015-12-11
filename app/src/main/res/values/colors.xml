@@ -4,4 +4,5 @@
     <color name="white">#FFFFFF</color>
     <color name="silverGray">#C0C0C0</color>
     <color name="lightBlue">#FF64C2F4</color>
+    <color name="transparentLightBlue">#8064C2F4</color>
 </resources>
