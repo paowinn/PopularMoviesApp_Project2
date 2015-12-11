@@ -12,10 +12,15 @@ public class Utility {
     public static boolean deviceIsConnected(Context context)
     {
         //Determine if there is an active internet connection
-        ConnectivityManager connectivityManager = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(context != null) {
+            ConnectivityManager connectivityManager = (ConnectivityManager)
+                    context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-        return((activeNetwork != null) && activeNetwork.isConnectedOrConnecting());
+            NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+            return ((activeNetwork != null) && activeNetwork.isConnectedOrConnecting());
+        }
+
+        return false;
+
     }
 }

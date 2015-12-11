@@ -329,9 +329,11 @@ public class MovieDetailFragment extends Fragment {
                     }
                 }
 
-            } else if (result == null && !Utility.deviceIsConnected(getActivity()))
+            } else if (result == null && !Utility.deviceIsConnected(getActivity())) {
+                if(getActivity() != null)
                 Toast.makeText(getActivity(), getString(R.string.no_internet_error),
                         Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
