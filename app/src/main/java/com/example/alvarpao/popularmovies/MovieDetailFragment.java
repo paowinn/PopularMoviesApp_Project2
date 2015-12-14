@@ -38,6 +38,7 @@ public class MovieDetailFragment extends Fragment {
 
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
     static final String MOVIE_DETAILS = "movie_details";
+    static final String MOVIE = "movie";
 
     private Movie mMovie;
     private MovieDetailsRecyclerAdapter mMovieDetailsAdapter;
@@ -58,8 +59,14 @@ public class MovieDetailFragment extends Fragment {
         if(arguments == null)
             arguments = getActivity().getIntent().getExtras();
 
-        if(arguments != null)
-         mMovie = arguments.getParcelable(MOVIE_DETAILS);
+        // Restore state of DetailsFragment if there was a rotation
+        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIE))
+            mMovie = savedInstanceState.getParcelable(MOVIE);
+
+        else {
+            if (arguments != null)
+                mMovie = arguments.getParcelable(MOVIE_DETAILS);
+        }
 
         // Initialize Movie Details' recycler view
         mMovieDetailsRecyclerView = (RecyclerView)
@@ -72,12 +79,24 @@ public class MovieDetailFragment extends Fragment {
             // getExtraMovieInfo() is called that the adapter is populated.
             mMovieDetailsAdapter = new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mMovie.trailers, mMovie.reviews);
             // Make sure the trailers and reviews for the adapter are reset
-            mMovieDetailsAdapter.clear();
             mMovieDetailsRecyclerView.setAdapter(mMovieDetailsAdapter);
-            getExtraMovieInfo();
+
+            //No needed to retrieve trailers and reviews if there was a rotation
+            if(savedInstanceState == null) {
+                mMovieDetailsAdapter.clearTrailersAndReviews();
+                mMovieDetailsAdapter.notifyDataSetChanged();
+                getExtraMovieInfo();
+            }
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        //Save movie details to be restored after rotation
+        if(mMovie != null)
+            savedInstanceState.putParcelable(MOVIE, mMovie);
     }
 
     private void getExtraMovieInfo() {

@@ -174,7 +174,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
         mTrailerViewHolder.backgroundTailer.setSelected(false);
     }
 
-    public void clear(){
+    public void clearTrailersAndReviews(){
         mTrailerList.clear();
         mReviewList.clear();
     }
