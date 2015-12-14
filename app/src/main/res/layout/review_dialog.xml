@@ -1,0 +1,33 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/review_dialog_content_top_margin"
+        android:layout_marginLeft="@dimen/review_dialog_content_margin"
+        android:layout_marginRight="@dimen/review_dialog_content_margin"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <TextView
+            android:id="@+id/dialogReviewContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/dialogReviewBtnOK"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/review_dialog_button_margin"
+        android:layout_marginLeft="@dimen/review_dialog_button_margin"
+        android:layout_marginRight="@dimen/review_dialog_button_margin"
+        android:layout_marginTop="0dp"
+        android:text="@string/review_dialog_button_ok" />
+
+</LinearLayout>

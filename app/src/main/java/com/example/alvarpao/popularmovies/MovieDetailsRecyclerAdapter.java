@@ -1,7 +1,9 @@
 package com.example.alvarpao.popularmovies;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
@@ -10,12 +12,12 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -43,6 +45,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
     private SparseBooleanArray mTrailerSelectedItems;
     private int mSelectedTrailerPosition = 1;
     private TrailerViewHolder mTrailerViewHolder;
+    private ReviewViewHolder mReviewViewHolder;
     private SparseBooleanArray mReviewSelectedItems;
     private int mSelectedReviewPosition = 1;
 
@@ -79,10 +82,45 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
     };
 
     View.OnClickListener reviewClickListener = new View.OnClickListener() {
+
+        private void showReviewDialog(String author, String content){
+            // Creating custom review dialog
+            final Dialog dialog = new Dialog(mContext);
+            dialog.setContentView(R.layout.review_dialog);
+            dialog.setTitle(mContext.getString(R.string.review_by) + author);
+
+            TextView reviewContent = (TextView) dialog.findViewById(R.id.dialogReviewContent);
+            reviewContent.setText(content);
+
+            Button dialogButton = (Button) dialog.findViewById(R.id.dialogReviewBtnOK);
+            // if button is clicked, close the review dialog
+            dialogButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                    deselectReviewItem();
+                }
+            });
+
+            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    dialog.dismiss();
+                    deselectReviewItem();
+                }
+            });
+
+            //This forces the user to click the "OK" button instead of clicking outside the dialog
+            // to close it (so it doesn't get leaked and dismiss() is appropriately called
+            dialog.setCanceledOnTouchOutside(false);
+
+            dialog.show();
+        }
+
         @Override
         public void onClick(View view) {
-            ReviewViewHolder holder = (ReviewViewHolder) view.getTag();
-            int position = holder.getAdapterPosition();
+            mReviewViewHolder = (ReviewViewHolder) view.getTag();
+            int position = mReviewViewHolder.getAdapterPosition();
             int reviewPosition = (position - mTrailerList.size()) - 1;
 
             // Save the selected position to the boolean array, to keep track of the selected
@@ -90,18 +128,18 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             if(mReviewSelectedItems.get(reviewPosition, false)){
                 // If selected when clicked, deselect it
                 mReviewSelectedItems.delete(reviewPosition);
-                holder.backgroundReview.setSelected(false);
+                mReviewViewHolder.backgroundReview.setSelected(false);
             }
 
             else{
                 // If not selected when clicked, select it
                 mReviewSelectedItems.put(reviewPosition, true);
-                holder.backgroundReview.setSelected(true);
+                mReviewViewHolder.backgroundReview.setSelected(true);
                 mSelectedReviewPosition = reviewPosition;
             }
 
             Review review = mReviewList.get(reviewPosition);
-            Toast.makeText(mContext, review.getAuthor(), Toast.LENGTH_SHORT).show();
+            showReviewDialog(review.getAuthor(), review.getContent());
         }
     };
 
@@ -171,7 +209,13 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
 
     public void deselectTrailerItem(){
         mTrailerSelectedItems.delete(mSelectedTrailerPosition);
-        mTrailerViewHolder.backgroundTailer.setSelected(false);
+        if(mTrailerViewHolder != null)
+          mTrailerViewHolder.backgroundTailer.setSelected(false);
+    }
+
+    public void deselectReviewItem(){
+        mReviewSelectedItems.delete(mSelectedReviewPosition);
+        mReviewViewHolder.backgroundReview.setSelected(false);
     }
 
     public void clearTrailersAndReviews(){

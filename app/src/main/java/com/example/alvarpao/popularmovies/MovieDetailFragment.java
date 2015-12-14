@@ -39,10 +39,12 @@ public class MovieDetailFragment extends Fragment {
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
     static final String MOVIE_DETAILS = "movie_details";
     static final String MOVIE = "movie";
+    static final String SCROLL_POSITION = "scroll_position";
 
     private Movie mMovie;
     private MovieDetailsRecyclerAdapter mMovieDetailsAdapter;
     private RecyclerView mMovieDetailsRecyclerView;
+    private int mScrollPosition = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,8 +62,14 @@ public class MovieDetailFragment extends Fragment {
             arguments = getActivity().getIntent().getExtras();
 
         // Restore state of DetailsFragment if there was a rotation
-        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIE))
-            mMovie = savedInstanceState.getParcelable(MOVIE);
+        if (savedInstanceState != null) {
+
+            if (savedInstanceState.containsKey(MOVIE))
+                mMovie = savedInstanceState.getParcelable(MOVIE);
+
+            if (savedInstanceState.containsKey(SCROLL_POSITION))
+                mScrollPosition = savedInstanceState.getInt(SCROLL_POSITION);
+        }
 
         else {
             if (arguments != null)
@@ -81,6 +89,10 @@ public class MovieDetailFragment extends Fragment {
             // Make sure the trailers and reviews for the adapter are reset
             mMovieDetailsRecyclerView.setAdapter(mMovieDetailsAdapter);
 
+            // Restore scroll position for Recycler View
+            if(savedInstanceState != null)
+                mMovieDetailsRecyclerView.getLayoutManager().scrollToPosition(mScrollPosition);
+
             //No needed to retrieve trailers and reviews if there was a rotation
             if(savedInstanceState == null) {
                 mMovieDetailsAdapter.clearTrailersAndReviews();
@@ -97,6 +109,9 @@ public class MovieDetailFragment extends Fragment {
         //Save movie details to be restored after rotation
         if(mMovie != null)
             savedInstanceState.putParcelable(MOVIE, mMovie);
+
+        // Save current scroll position for the recycler view
+        savedInstanceState.putInt(SCROLL_POSITION, ((LinearLayoutManager) mMovieDetailsRecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
     }
 
     private void getExtraMovieInfo() {

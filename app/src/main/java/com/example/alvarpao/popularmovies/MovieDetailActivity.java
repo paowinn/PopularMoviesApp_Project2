@@ -23,6 +23,15 @@ public class MovieDetailActivity extends ActionBarActivity{
                     .add(R.id.movie_details_container, mMovieDetailFragment)
                     .commit();
         }
+
+        else{
+
+            mMovieDetailFragment =  new MovieDetailFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_details_container,
+                            mMovieDetailFragment)
+                    .commit();
+        }
     }
 
     public void deleteMovieFromFavorites(Movie movie){
@@ -45,7 +54,10 @@ public class MovieDetailActivity extends ActionBarActivity{
 
         // This method gets called from the MovieDetailsRecylerAdapter class to deselect a
         // trailer after the youtube video has been launched
-        if(requestCode == MovieDetailsRecyclerAdapter.TRAILER_SELECTED)
-          mMovieDetailFragment.deselectTrailerItem();
+
+        if (requestCode == MovieDetailsRecyclerAdapter.TRAILER_SELECTED) {
+            if (mMovieDetailFragment != null)
+                mMovieDetailFragment.deselectTrailerItem();
+        }
     }
 }

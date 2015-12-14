@@ -50,5 +50,7 @@
     <string name="no_trailers_found">No trailers found for this movie</string>
     <string name="no_reviews_found">No reviews found</string>
     <string name="no_match_view_type">No match for view type:\u0020</string>
+    <string name="review_by">Review by\u0020</string>
+    <string name="review_dialog_button_ok">OK</string>
 
 </resources>

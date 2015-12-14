@@ -35,9 +35,11 @@ public class MainActivity extends ActionBarActivity implements MovieGridFragment
 
             mTwoPaneLayout = true;
             if (savedInstanceState == null) {
+
+                mDetailsFragment = new MovieDetailFragment();
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.movie_details_container,
-                                new MovieDetailFragment(), MOVIE_DETAILS_FRAGMENT_TAG)
+                                mDetailsFragment, MOVIE_DETAILS_FRAGMENT_TAG)
                         .commit();
             }
         }

@@ -1,0 +1,16 @@
+<GridView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/movies_grid"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true"
+    android:columnWidth="100dp"
+    android:numColumns="auto_fit"
+    android:verticalSpacing="@dimen/fragment_gridview_vertical_spacing"
+    android:horizontalSpacing="@dimen/fragment_gridview_horizontal_spacing"
+    android:stretchMode="columnWidth"
+    android:drawSelectorOnTop="true"
+    tools:context=".MainActivityFragment" />
+

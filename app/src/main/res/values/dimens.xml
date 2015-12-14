@@ -34,4 +34,7 @@
     <dimen name="review_top_margin">30dp</dimen>
     <dimen name="review_right_margin">10dp</dimen>
     <dimen name="review_right_padding">10dp</dimen>
+    <dimen name="review_dialog_content_top_margin">10dp</dimen>
+    <dimen name="review_dialog_content_margin">20dp</dimen>
+    <dimen name="review_dialog_button_margin">10dp</dimen>
 </resources>
