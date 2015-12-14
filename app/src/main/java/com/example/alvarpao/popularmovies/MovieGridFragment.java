@@ -49,42 +49,73 @@ import java.util.Date;
 public class MovieGridFragment extends Fragment implements AbsListView.OnScrollListener{
 
     private GridView mMoviesGridView;
+    private ArrayList<Movie> mMovies;
+    private ArrayList<Movie> mSavedMovies = new ArrayList<Movie>();
     private MovieAdapter mMovieAdapter;
     private Spinner mSortSpinner;
     private boolean mLoadingMovies = true;
     private int mPageToFetch = 1;
     private int mPreviousTotalItems = 0;
+    private int mSelectedMovie = -1;
+    private boolean mSelectionOccurred = false;
     private static final String PAGE_1 = "1";
-    private int mCurrentScrollPosition = GridView.INVALID_POSITION;
+    private int mCurrentScrollPosition = 0;
 
-    public static final String EXTRA_ID = "com.example.alvarpao.popularmovies.ID";
-    public static final String EXTRA_IMAGE_URL = "com.example.alvarpao.popularmovies.IMAGE_URL";
-    public static final String EXTRA_ORIGINAL_TITLE = "com.example.alvarpao.popularmovies.ORIGINAL_TITLE";
-    public static final String EXTRA_PLOT_SYNOPSIS = "com.example.alvarpao.popularmovies.PLOT_SYNOPSIS";
-    public static final String EXTRA_USER_RATING = "com.example.alvarpao.popularmovies.USER_RATING";
-    public static final String EXTRA_RELEASE_YEAR = "com.example.alvarpao.popularmovies.RELEASE_YEAR";
     private static final String CURRENT_SCROLL_POSITION = "current_scroll_position";
-
+    private static final String LOADED_MOVIES = "loaded_movies";
+    private static final String PAGE_TO_FETCH = "page_to_fetch";
+    private static final String LOADED_PREVIOUS_ITEMS = "previous_total_items";
+    private static final String SELECTED_MOVIE = "selected_movie";
+    private static final String SELECTION_OCCURRED = "selection_occurred";
 
     // This is an interface that the MainActivity containing the MovieGridFragment has to implement
-    // in order for the fragment to notify the activity when a movie has been selected
+    // in order for the fragment to notify the activity when a movie has been selected, or when
+    // the DetailsFragment has to be cleared
     public interface Callback {
-
         // The MainActivity will have to implement this method
-        public void onItemSelected(Movie movie);
-        public void clearDetailsFragment();
-    }
-
-
-    public MovieGridFragment() {
+        void onItemSelected(Movie movie);
+        void clearDetailsFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         // Add the below line in order for this fragment to display and handle menu options.
         setHasOptionsMenu(true);
 
+        if(savedInstanceState != null)
+        {
+            //State needs to be restored for this activity, a rotation occurred
+            if(savedInstanceState.containsKey(LOADED_MOVIES))
+                mMovies = savedInstanceState.getParcelableArrayList(LOADED_MOVIES);
+            if(savedInstanceState.containsKey(PAGE_TO_FETCH))
+              mPageToFetch = savedInstanceState.getInt(PAGE_TO_FETCH);
+            if(savedInstanceState.containsKey(LOADED_PREVIOUS_ITEMS))
+                mPreviousTotalItems = savedInstanceState.getInt(LOADED_PREVIOUS_ITEMS);
+            if(savedInstanceState.containsKey(SELECTION_OCCURRED))
+                mSelectionOccurred = savedInstanceState.getBoolean(SELECTION_OCCURRED);
+            if(savedInstanceState.containsKey(CURRENT_SCROLL_POSITION))
+                mCurrentScrollPosition = savedInstanceState.getInt(CURRENT_SCROLL_POSITION);
+        }
+
+        else
+            mMovies = new ArrayList<Movie>();
+    }
+
+    private void updateDetailsFragment(){
+
+        if (mMovieAdapter.getCount() > 0) {
+            if (mSelectedMovie == -1) {
+                // No movie has been selected by user, select the first one by default
+                Movie firstMovie = mMovieAdapter.getItem(0);
+                ((Callback) getActivity()).onItemSelected(firstMovie);
+            } else {
+                Movie selectedMovie = mMovieAdapter.getItem(mSelectedMovie);
+                ((Callback) getActivity()).onItemSelected(selectedMovie);
+            }
+        } else
+            ((Callback) getActivity()).clearDetailsFragment();
     }
 
     @Override
@@ -103,21 +134,55 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                // Update the shared preferences with the new sort option election
-                SharedPreferences sharedPreferences =
-                        PreferenceManager.getDefaultSharedPreferences(getActivity());
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                //Save the sort_by value to query the movie database
-                editor.putString(getString(R.string.sort_preference_key),
-                        sortArrayValues.getString(position));
-                // Save the current position of the selected sort option
-                editor.putInt(getString(R.string.sort_position_preference_key), position);
-                editor.commit();
+                if(Utility.getPreferredSortOptionPosition(getActivity()) != position) {
+                    // Update the shared preferences with the new sort option election
+                    SharedPreferences sharedPreferences =
+                            PreferenceManager.getDefaultSharedPreferences(getActivity());
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    //Save the sort_by value to query the movie database
+                    editor.putString(getString(R.string.sort_preference_key),
+                            sortArrayValues.getString(position));
+                    // Save the current position of the selected sort option
+                    editor.putInt(getString(R.string.sort_position_preference_key), position);
+                    editor.commit();
 
-                // Update movie grid to reflect new sort option selected by user
-                resetMovieGrid();
-                getMovies(PAGE_1);
+                    // Update movie grid to reflect new sort option selected by user
+                    resetMovieGrid();
+                    getMovies(PAGE_1);
+                }
 
+                else {
+                    // If the sort option didn't change, the event most likely was triggered by
+                    // either a rotation or the activity being created. In case of the rotation
+                    // the state has already been restored in the onCreate() method, after onCreate()
+                    // the onCreateOptionsMenu() is called. If the activity has been created, the
+                    // favorite movies need to be fetched
+                    if (Utility.getPreferredSortOption(getActivity()).equals(getString(R.string.sort_favorites_value))) {
+                        if(!mMovies.isEmpty() && ((MainActivity) getActivity()).inTwoPaneLayout())
+                            updateDetailsFragment();
+                        else if(mMovies.isEmpty())
+                            getMovies(Integer.valueOf(mPageToFetch).toString());
+                    }
+
+                    else {
+                        // For the other sort options since pagination is involved the default
+                        // movie to display in the details fragment when the user hasn't selected
+                        // any movie is either the first one in the returned list when it is
+                        // first loaded or the first visible movie before rotation. The first one
+                        // when is first loaded is instantiated in the onScroll method
+                        if(((MainActivity) getActivity()).inTwoPaneLayout()) {
+                            if(mSelectedMovie!= -1) {
+                                Movie selectedMovie = mMovieAdapter.getItem(mSelectedMovie);
+                                ((Callback) getActivity()).onItemSelected(selectedMovie);
+                            }
+                        }
+                        // Determine if another page needs to be retrieved by making an API call
+                        getMovies(Integer.valueOf(mPageToFetch).toString());
+                    }
+
+                    // Restoring the scroll position
+                    mMoviesGridView.smoothScrollToPosition(mCurrentScrollPosition);
+                }
             }
 
             @Override
@@ -128,14 +193,8 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
         // This statement is needed to restore the state of the sort selection in case a screen
         // rotation has occurred. The spinner is restored to the position it was retrieved
-        // from the savedInstanceState received in the onCreateView method (after onCreateView
-        // finishes onCreateOptionsMenu is called).
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        int paramSortPosition = preferences.getInt(
-                getString(R.string.sort_position_preference_key), 0);
-        mSortSpinner.setSelection(paramSortPosition);
-
+        // from the SharedPreferences;
+        mSortSpinner.setSelection(Utility.getPreferredSortOptionPosition(getActivity()));
     }
 
     @Override
@@ -152,41 +211,40 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        // The adapter is initialized with an empty array of movies until it gets data
-        // from the website
-        mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
-
+        // The adapter is initialized with an empty array if state wasn't restore on rotation, if
+        // it was, the array of movies already has the saved data.
+        Toast.makeText(getActivity(), "mMovies size restored: " + mMovies.size(), Toast.LENGTH_SHORT).show();
+        mMovieAdapter = new MovieAdapter(getActivity(), mMovies);
         mMoviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
         mMoviesGridView.setDrawSelectorOnTop(true);
         mMoviesGridView.setAdapter(mMovieAdapter);
-
         mMoviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view,
                                     int position, long id) {
                 // This will force to draw the selector on top of the poster for the selected movie
                 view.setSelected(true);
+                mSelectedMovie = position;
+                // A selection occurred as opposed to selecting the first visible item by default
+                // so the details fragment is not empty in the two-pane layout.
+                mSelectionOccurred = true;
+                Toast.makeText(getActivity(), "Selected Movie: " + ((Movie) mMoviesGridView.getItemAtPosition(position)).getOriginalTitle(), Toast.LENGTH_SHORT).show();
                 Movie movie = mMovieAdapter.getItem(position);
-
                 // A movie has been selected so the MainActivity has to be notified to take
                 // appropriate action
                 ((Callback) getActivity()).onItemSelected(movie);
-
             }
         });
 
-        //Handles pagination for movie grid
+        // Handles pagination for movie grid, except in the case the sort option is "Favorites",
+        // since we don't need pagination in that case
         mMoviesGridView.setOnScrollListener(this);
 
-        // If a screen rotation occurred, the scroll position in the movie grid needs to be restored
-        // by retrieving the value from the savedInstanceState variable
-        if (savedInstanceState != null)
-        {
-            if(savedInstanceState.containsKey(CURRENT_SCROLL_POSITION))
-            {
-                mCurrentScrollPosition = savedInstanceState.getInt(CURRENT_SCROLL_POSITION);
-                mMoviesGridView.smoothScrollToPosition(mCurrentScrollPosition);
-            }
-        }
+        // If a rotation occurred, restore the selected movie (either selected by the user or
+        // "selected" by default (first visible movie before rotation))
+        // The restore of the details fragment with this selected after rotation is handled in the
+        // onCreateOptionsMenu() method which is called after onCreateView()
+        if(savedInstanceState != null && savedInstanceState.containsKey((SELECTED_MOVIE)))
+            mSelectedMovie = savedInstanceState.getInt(SELECTED_MOVIE);
 
         return rootView;
     }
@@ -196,11 +254,8 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         // Get the current selected sort option. If it is "Favorites" don't fetch another page
         // when scrolling since we have the whole list of movies in the local database and we don't
         // need to make requests to the API
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
-                getString(R.string.sort_preference_default));
 
-        if(!paramSortValue.equals(getString(R.string.sort_favorites_value))) {
+        if(!(Utility.getPreferredSortOption(getActivity())).equals(getString(R.string.sort_favorites_value))) {
             // Since the onScroll method can get called several times at one time when the user is
             // scrolling, need to verify if the images are still loading before fetching another page
             // of results (loading it is first initialized as true)
@@ -215,8 +270,12 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                     // the app is first loaded) show an instance of the detail fragment with the
                     // info of the first movie in the returned list of movies
                     if ((mPageToFetch == 1) && ((MainActivity) getActivity()).inTwoPaneLayout()) {
-                        Movie firstMovie = mMovieAdapter.getItem(0);
-                        ((Callback) getActivity()).onItemSelected(firstMovie);
+                        if(mMovieAdapter.getCount() > 0) {
+                            Movie firstMovie = mMovieAdapter.getItem(0);
+                            ((Callback) getActivity()).onItemSelected(firstMovie);
+                        }
+                        else
+                            ((Callback) getActivity()).clearDetailsFragment();
                     }
 
                     mPageToFetch++;
@@ -227,7 +286,6 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             // the user has scrolled enough far down that there will be no more items to display in
             // the next scroll
             if (!mLoadingMovies && (totalItemCount == (firstVisibleItem + visibleItemCount))) {
-
                 getMovies(Integer.toString(mPageToFetch));
                 mLoadingMovies = true;
             }
@@ -235,61 +293,61 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
     }
 
     @Override
-    public void onScrollStateChanged (AbsListView view, int scrollState)
-    {
+    public void onScrollStateChanged (AbsListView view, int scrollState) {
         // Needs to be part of the class, but no need to implement it for the movie grid
     }
 
-    private void resetMovieGrid()
-    {
-        // Clear movie grid adapter
+    private void resetMovieGrid() {
+
+        // When a change is sort option occurs the movie grid parameters need to be reset since
+        // we are going to be working with a different list of movies
+        Toast.makeText(getActivity(), "Reset Movie Grid", Toast.LENGTH_SHORT).show();
+        // Reset movie grid variables
         mMovieAdapter.clear();
+        mSavedMovies.clear();
+        mSelectedMovie = -1;
+        mSelectionOccurred = false;
 
         // Reset scroll parameters
         mPageToFetch = 1;
         mLoadingMovies = true;
         mPreviousTotalItems = 0;
-
+        mCurrentScrollPosition = 0;
     }
 
-    private void getMovies(String pageToFetch)
-    {
+    private void getMovies(String pageToFetch) {
+
+        Toast.makeText(getActivity(), "Fetching page: " + Integer.valueOf(mPageToFetch).toString(), Toast.LENGTH_SHORT).show();
         FetchMoviesTask fetchMoviesTask = new FetchMoviesTask();
         //Get the appropriate sort option to fetch the movies in the right order
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
-                getString(R.string.sort_preference_default));
-        fetchMoviesTask.execute(paramSortValue, pageToFetch);
+        fetchMoviesTask.execute(Utility.getPreferredSortOption(getActivity()), pageToFetch);
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
-        // When a screen rotation occurs the scroll position needs to be saved to be restored later
-        if (mCurrentScrollPosition != GridView.INVALID_POSITION) {
-            savedInstanceState.putInt(CURRENT_SCROLL_POSITION,
-                    mMoviesGridView.getFirstVisiblePosition());
+        mSavedMovies.clear();
+        for(int index = 0; index < mMovieAdapter.getCount(); index++)
+            mSavedMovies.add(mMovieAdapter.getItem(index));
+        Toast.makeText(getActivity(), "Number of movies saved: " + mSavedMovies.size(), Toast.LENGTH_SHORT).show();
+        savedInstanceState.putParcelableArrayList(LOADED_MOVIES, mSavedMovies);
+        savedInstanceState.putInt(PAGE_TO_FETCH, mPageToFetch);
+        savedInstanceState.putInt(LOADED_PREVIOUS_ITEMS, mPreviousTotalItems);
+        // The user actually selected a movie, it was not pre-selected by the app to keep the
+        // details fragment from being empty in the two-pane layout
+        if((mSelectedMovie != -1) && (mSelectionOccurred))
+            savedInstanceState.putInt(SELECTED_MOVIE, mSelectedMovie);
+        else {
+            // No movie selected save the position of the first visible item
+            Toast.makeText(getActivity(), "No position selected, select first visible", Toast.LENGTH_SHORT).show();
+            savedInstanceState.putInt(SELECTED_MOVIE, mMoviesGridView.getFirstVisiblePosition());
         }
+        savedInstanceState.putBoolean(SELECTION_OCCURRED, mSelectionOccurred);
+        savedInstanceState.putInt(CURRENT_SCROLL_POSITION, mMoviesGridView.getFirstVisiblePosition());
 
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    // This method is the equivalent of the onRestoreInstanceState method for activities
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-
-        super.onActivityCreated(savedInstanceState);
-
-        if (savedInstanceState != null)
-        {
-            if(savedInstanceState.containsKey(CURRENT_SCROLL_POSITION)) {
-                //If there was a screen rotation restore the saved scroll position
-                mCurrentScrollPosition = savedInstanceState.getInt(CURRENT_SCROLL_POSITION);
-            }
-
-        }
-
-    }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
 
@@ -346,10 +404,10 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
                 movies[index] = new Movie(movieInfo.getLong(ID),
                         buildImageURL(movieInfo.getString(POSTER_PATH)),
-                                          movieInfo.getString(ORIGINAL_TITLE),
-                                          movieInfo.getString(PLOT_SYNOPSIS),
-                                          movieInfo.getDouble(USER_RATING),
-                                          Integer.toString(calendar.get(Calendar.YEAR)));
+                        movieInfo.getString(ORIGINAL_TITLE),
+                        movieInfo.getString(PLOT_SYNOPSIS),
+                        movieInfo.getDouble(USER_RATING),
+                        Integer.toString(calendar.get(Calendar.YEAR)));
                 Log.v(LOG_TAG, "Poster Paths[" + Integer.toString(index) + "]: " + movieInfo.getString(POSTER_PATH));
             }
 
@@ -360,14 +418,12 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         private Movie[] getFavoriteMovies(){
 
             // Query the local database for all the user's favorite movies
-            // Get reference to writable favorite movies database
-
             Movie[] movies = {};
             int index = 0;
             FavoriteMoviesDbHelper dbHelper = new FavoriteMoviesDbHelper(getActivity());
             SQLiteDatabase database = dbHelper.getWritableDatabase();
             Cursor favoriteCursor = database.query(
-                    FavoriteMoviesContract.FavoriteEntry.TABLE_NAME,  // Table to Query
+                    FavoriteMoviesContract.FavoriteEntry.TABLE_NAME,  // Table to query
                     null, // leaving "columns" null just returns all the columns.
                     null, // cols for "where" clause
                     null, // values for "where" clause
@@ -401,7 +457,8 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             BufferedReader bufferedReader = null;
             String movieInfoJsonReply = null;
 
-            // If there is no sorting criteria (popularity, rating) no point on fetching anything
+            // If there is no sorting criteria (popularity, rating, favorites) no point on fetching
+            // anything
             if (params.length == 0) {
                 return null;
             }
@@ -410,7 +467,6 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 try {
                     // Construction of the URL query for the Movie Database
                     // More info about the API: http://docs.themoviedb.apiary.io/#
-
                     Uri.Builder uriQuery = Uri.parse(DISCOVER_MOVIE_ENDPOINT_BASE_URL).buildUpon()
                             .appendQueryParameter(API_KEY_PARAMETER, ApiKey.API_KEY)
                             .appendQueryParameter(SORT_PARAMETER, params[0])
@@ -438,7 +494,6 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
                         inputStream = urlConnection.getInputStream();
                         receiveBuffer = new StringBuffer();
-
 
                         if (inputStream == null) {
                             return null;
@@ -491,7 +546,6 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
                 // Parse JSON response to extract the movie required movie infor
                 try {
-
                     return getMovieInfoFromJson(movieInfoJsonReply);
                 } catch (JSONException exception) {
                     Log.e(LOG_TAG, exception.getMessage(), exception);
@@ -502,8 +556,9 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 }
             }
 
+            // No need to query the API, just the local database
             else
-              return getFavoriteMovies();
+                return getFavoriteMovies();
 
             return null;
         }
@@ -514,13 +569,11 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             // of the poster_path (relative path) returned by the FetchMoviesTask. You then
             // need to append the size and then finally the poster_path returned by the AsyncTask.
             // For more information check the Movie Database API in the configuration section
-
             final String BASE_URL = "http://image.tmdb.org/t/p/";
             String size = "w185";
 
             Log.v(LOG_TAG, "Movie Poster: " + BASE_URL + size + posterPath);
             return BASE_URL + size + posterPath;
-
         }
 
         @Override
@@ -528,35 +581,22 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
             if (movies != null) {
 
-                for(Movie movie : movies) {
+                for(Movie movie : movies)
                     mMovieAdapter.add(movie);
-                }
-
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                String paramSortValue = preferences.getString(getString(R.string.sort_preference_key),
-                        getString(R.string.sort_preference_default));
 
                 // Get the current selected sort option. If it is "Favorites", Check if device is
                 // in two-pane mode. If that is the case show an instance of the detail fragment
-                // with the info of the first movie in the favorite list of movies
-                if(paramSortValue.equals(getString(R.string.sort_favorites_value))) {
-                    if (((MainActivity) getActivity()).inTwoPaneLayout()) {
-                        if(mMovieAdapter.getCount() > 0) {
-                            Movie firstMovie = mMovieAdapter.getItem(0);
-                            ((Callback) getActivity()).onItemSelected(firstMovie);
-                        }
-                        else{
-                            ((Callback) getActivity()).clearDetailsFragment();
-                        }
-                    }
+                // with the info of the first movie in the list or the restored selected movie
+                // (in case there was a rotation)
+                if ((Utility.getPreferredSortOption(getActivity())).equals(getString(R.string.sort_favorites_value))) {
+                    if ((movies.length != 0) && ((MainActivity) getActivity()).inTwoPaneLayout())
+                        updateDetailsFragment();
                 }
             }
 
             else if(movies == null && !Utility.deviceIsConnected(getActivity()))
                 Toast.makeText(getActivity(), getString(R.string.no_internet_error),
                         Toast.LENGTH_SHORT).show();
-
         }
-
     }
 }

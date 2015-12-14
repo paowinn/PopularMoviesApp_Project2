@@ -81,37 +81,39 @@ public class QueryIfFavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
         // Determine if the movie is in the favorite user's list
         if (result != null) {
             // Movie is in user's favorite list
-            btnFavorite.setImageResource(R.drawable.favorite);
+            if(btnFavorite != null) {
+                btnFavorite.setImageResource(R.drawable.favorite);
 
-            // Change the onClick listener method to drop the movie if clicked again and
-            // to update the image on the button appropriately
-            btnFavorite.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
+                // Change the onClick listener method to drop the movie if clicked again and
+                // to update the image on the button appropriately
+                btnFavorite.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.v(LOG_TAG, "Drop movie from favorite list " + mMovie.getOriginalTitle());
 
-                    //One-pane layout being displayed
-                    if (mContext instanceof MovieDetailActivity)
-                        ((MovieDetailActivity) mContext).deleteMovieFromFavorites(mMovie);
-                    //Two-pane layout being displayed
-                    else if(mContext instanceof MainActivity)
-                        ((MainActivity) mContext).deleteMovieFromFavorites(mMovie);
-
-                    btnFavorite.setImageResource(R.drawable.star);
-                    btnFavorite.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-                            //One-pane layout being displayed
-                            if (mContext instanceof MovieDetailActivity)
-                                ((MovieDetailActivity) mContext).saveFavoriteMovieDetails(mMovie);
+                        //One-pane layout being displayed
+                        if (mContext instanceof MovieDetailActivity)
+                            ((MovieDetailActivity) mContext).deleteMovieFromFavorites(mMovie);
                             //Two-pane layout being displayed
-                            else if(mContext instanceof MainActivity)
-                                ((MainActivity) mContext).saveFavoriteMovieDetails(mMovie);
-                        }
-                    });
-                }
-            });
+                        else if (mContext instanceof MainActivity)
+                            ((MainActivity) mContext).deleteMovieFromFavorites(mMovie);
+
+                        btnFavorite.setImageResource(R.drawable.star);
+                        btnFavorite.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                //One-pane layout being displayed
+                                if (mContext instanceof MovieDetailActivity)
+                                    ((MovieDetailActivity) mContext).saveFavoriteMovieDetails(mMovie);
+                                    //Two-pane layout being displayed
+                                else if (mContext instanceof MainActivity)
+                                    ((MainActivity) mContext).saveFavoriteMovieDetails(mMovie);
+                            }
+                        });
+                    }
+                });
+            }
         }
     }
 }
