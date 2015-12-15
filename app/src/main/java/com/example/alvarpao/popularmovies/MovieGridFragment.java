@@ -187,7 +187,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                         // first loaded or the first visible movie before rotation. The first one
                         // when is first loaded is instantiated in the onScroll method
                         if(((MainActivity) getActivity()).inTwoPaneLayout()) {
-                            if(mSelectedMovie!= -1) {
+                            if((mSelectedMovie!= -1) && (mMovieAdapter.getCount() != 0)){
                                 Movie selectedMovie = mMovieAdapter.getItem(mSelectedMovie);
                                 ((Callback) getActivity()).onItemSelected(selectedMovie);
                             }
