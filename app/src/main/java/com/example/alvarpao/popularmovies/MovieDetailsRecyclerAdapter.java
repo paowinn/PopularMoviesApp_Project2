@@ -294,8 +294,8 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter<RecyclerVi
             String thumbnailURL = buildThumbnailURL(trailer.getSource());
             // Load the image using picasso library
             Picasso.with(mContext).load(thumbnailURL)
-                    .placeholder(R.drawable.image_loading)
-                    .error(R.drawable.error_loading_image)
+                    .placeholder(R.drawable.loading_trailer_thumbnail)
+                    .error(R.drawable.error_loading_trailer_thumbnail)
                     .into(trailerViewHolder.trailerThumbnail);
 
             // Setting the trailer's title

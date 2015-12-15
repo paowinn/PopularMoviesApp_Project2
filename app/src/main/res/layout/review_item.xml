@@ -16,7 +16,9 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/review_layout_margin_left"
+            android:layout_marginTop="@dimen/review_layout_margin_top">
 
             <TextView
                 android:id="@+id/reviewAuthor"

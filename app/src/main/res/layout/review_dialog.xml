@@ -9,6 +9,7 @@
         android:layout_marginTop="@dimen/review_dialog_content_top_margin"
         android:layout_marginLeft="@dimen/review_dialog_content_margin"
         android:layout_marginRight="@dimen/review_dialog_content_margin"
+        android:layout_marginBottom="@dimen/review_dialog_content_bottom_margin"
         android:layout_weight="1"
         android:fillViewport="true">
 

@@ -47,8 +47,8 @@
     <string name="error_saving_favorite">There was an error trying to save all the movie\'s details to your favorite\'s list</string>
     <string name="error_deleting_favorite">The movie could not be removed from your favorite\'s list</string>
 
-    <string name="no_trailers_found">No trailers found for this movie</string>
-    <string name="no_reviews_found">No reviews found</string>
+    <string name="no_trailers_found">No trailers found for\u0020</string>
+    <string name="no_reviews_found">No reviews found for\u0020</string>
     <string name="no_match_view_type">No match for view type:\u0020</string>
     <string name="review_by">Review by\u0020</string>
     <string name="review_dialog_button_ok">OK</string>

@@ -229,7 +229,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
         // The adapter is initialized with an empty array if state wasn't restore on rotation, if
         // it was, the array of movies already has the saved data.
-        Toast.makeText(getActivity(), "mMovies size restored: " + mMovies.size(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getActivity(), "mMovies size restored: " + mMovies.size(), Toast.LENGTH_SHORT).show();
         mMovieAdapter = new MovieAdapter(getActivity(), mMovies);
         mMoviesGridView = (GridView) rootView.findViewById(R.id.movies_grid);
         mMoviesGridView.setDrawSelectorOnTop(true);
@@ -243,7 +243,9 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 // A selection occurred as opposed to selecting the first visible item by default
                 // so the details fragment is not empty in the two-pane layout.
                 mSelectionOccurred = true;
-                Toast.makeText(getActivity(), "Selected Movie: " + ((Movie) mMoviesGridView.getItemAtPosition(position)).getOriginalTitle(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(), "Selected Movie: " +
+                // ((Movie) mMoviesGridView.getItemAtPosition(position)).getOriginalTitle(),
+                // Toast.LENGTH_SHORT).show();
                 Movie movie = mMovieAdapter.getItem(position);
                 // A movie has been selected so the MainActivity has to be notified to take
                 // appropriate action
@@ -317,7 +319,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
         // When a change is sort option occurs the movie grid parameters need to be reset since
         // we are going to be working with a different list of movies
-        Toast.makeText(getActivity(), "Reset Movie Grid", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(getActivity(), "Reset Movie Grid", Toast.LENGTH_SHORT).show();
         // Reset movie grid variables
         mMovieAdapter.clear();
         mSavedMovies.clear();
@@ -333,7 +335,8 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
 
     private void getMovies(String pageToFetch) {
 
-        Toast.makeText(getActivity(), "Fetching page: " + Integer.valueOf(mPageToFetch).toString(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getActivity(), "Fetching page: " + Integer.valueOf(mPageToFetch).toString(),
+        // Toast.LENGTH_SHORT).show();
         FetchMoviesTask fetchMoviesTask = new FetchMoviesTask();
         //Get the appropriate sort option to fetch the movies in the right order
         fetchMoviesTask.execute(Utility.getPreferredSortOption(getActivity()), pageToFetch);
@@ -345,7 +348,8 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
         mSavedMovies.clear();
         for(int index = 0; index < mMovieAdapter.getCount(); index++)
             mSavedMovies.add(mMovieAdapter.getItem(index));
-        Toast.makeText(getActivity(), "Number of movies saved: " + mSavedMovies.size(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getActivity(), "Number of movies saved: " + mSavedMovies.size(),
+        // Toast.LENGTH_SHORT).show();
         savedInstanceState.putParcelableArrayList(LOADED_MOVIES, mSavedMovies);
         savedInstanceState.putInt(PAGE_TO_FETCH, mPageToFetch);
         savedInstanceState.putInt(LOADED_PREVIOUS_ITEMS, mPreviousTotalItems);
@@ -355,7 +359,8 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
             savedInstanceState.putInt(SELECTED_MOVIE, mSelectedMovie);
         else {
             // No movie selected save the position of the first visible item
-            Toast.makeText(getActivity(), "No position selected, select first visible", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getActivity(), "No position selected, select first visible",
+            // Toast.LENGTH_SHORT).show();
             savedInstanceState.putInt(SELECTED_MOVIE, mMoviesGridView.getFirstVisiblePosition());
         }
         savedInstanceState.putBoolean(SELECTION_OCCURRED, mSelectionOccurred);
@@ -605,7 +610,7 @@ public class MovieGridFragment extends Fragment implements AbsListView.OnScrollL
                 // with the info of the first movie in the list or the restored selected movie
                 // (in case there was a rotation)
                 if ((Utility.getPreferredSortOption(getActivity())).equals(getString(R.string.sort_favorites_value))) {
-                    if ((movies.length != 0) && ((MainActivity) getActivity()).inTwoPaneLayout())
+                    if (((MainActivity) getActivity()).inTwoPaneLayout())
                         updateDetailsFragment();
                 }
             }

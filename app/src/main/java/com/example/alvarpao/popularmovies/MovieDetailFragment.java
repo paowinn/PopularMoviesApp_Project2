@@ -98,9 +98,10 @@ public class MovieDetailFragment extends Fragment {
         mMovieDetailsRecyclerView.setLayoutManager(new LinearLayoutManager(mMovieDetailsRecyclerView.getContext()));
         mMovieDetailsRecyclerView.setItemAnimator(null);
 
-        if (arguments != null) {
+        if((arguments != null)&&(mMovie != null)){
             // Initially the trailers and reviews arrays are empty, it is not after the
             // getExtraMovieInfo() is called that the adapter is populated.
+
             mMovieDetailsAdapter = new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mMovie.trailers, mMovie.reviews);
             // Make sure the trailers and reviews for the adapter are reset
             mMovieDetailsRecyclerView.setAdapter(mMovieDetailsAdapter);
@@ -357,7 +358,8 @@ public class MovieDetailFragment extends Fragment {
                                 trailerIndex++;
                             }
                         } else {
-                            Toast.makeText(getActivity(), getString(R.string.no_trailers_found),
+                            Toast.makeText(getActivity(), getString(R.string.no_trailers_found) +
+                                            "\"" +mMovie.getOriginalTitle() + "\"",
                                     Toast.LENGTH_SHORT).show();
                         }
 
@@ -369,7 +371,8 @@ public class MovieDetailFragment extends Fragment {
                                 reviewIndex++;
                             }
                         } else {
-                            Toast.makeText(getActivity(), getString(R.string.no_reviews_found),
+                            Toast.makeText(getActivity(), getString(R.string.no_reviews_found) +
+                                            "\"" +mMovie.getOriginalTitle() + "\"",
                                     Toast.LENGTH_SHORT).show();
                         }
 
